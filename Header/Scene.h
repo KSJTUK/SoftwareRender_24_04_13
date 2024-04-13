@@ -11,33 +11,68 @@ public:
 	CScene(CPlayer *pPlayer);
 	virtual ~CScene();
 
-private:
+protected:
 	int							m_nObjects = 0;
-	CGameObject					**m_ppObjects = NULL;
+	CGameObject**				m_ppObjects = NULL;
 
 	CWallsObject*				m_pWallsObject = NULL;
 
 	CPlayer*					m_pPlayer = NULL;
+
+	CGameObject*				m_pStartButton = NULL;
 
 #ifdef _WITH_DRAW_AXIS
 	CGameObject*				m_pWorldAxis = NULL;
 #endif
 
 public:
-	virtual void BuildObjects();
-	virtual void ReleaseObjects();
+	virtual void BuildObjects() { }
+	virtual void ReleaseObjects() { }
 
 	void CheckObjectByObjectCollisions();
 	void CheckObjectByWallCollisions();
 	void CheckPlayerByWallCollision();
 	void CheckObjectByBulletCollisions();
 
+	virtual void Animate(float fElapsedTime) { }
+	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera) { }
+
+	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { }
+	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { }
+
+	CGameObject* PickObjectPointedByCursor(int xClient, int yClient, CCamera* pCamera);
+};
+
+class CStartScene : public CScene
+{
+public:
+	CStartScene(CPlayer* pPlayer) : CScene(pPlayer) { }
+	virtual ~CStartScene() { }
+
+public:
+	virtual void BuildObjects();
+	virtual void ReleaseObjects();
+
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 
 	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-
-	CGameObject* PickObjectPointedByCursor(int xClient, int yClient, CCamera* pCamera);
 };
 
+class CPlayScene : public CScene
+{
+public:
+	CPlayScene(CPlayer* pPlayer) : CScene(pPlayer) { }
+	virtual ~CPlayScene() { } 
+
+public:
+	virtual void BuildObjects();
+	virtual void ReleaseObjects();
+
+	virtual void Animate(float fElapsedTime);
+	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
+
+	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+};

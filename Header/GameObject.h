@@ -169,7 +169,7 @@ public:
 	virtual void ActiveSheild();
 
 private:
-	const float m_fMaxActivedtime{ 3.f };
+	const float m_fMaxActivedtime{ 100.f };
 	const float m_fActiveLimitTime{ 3.f };
 	float m_fElapsedFromLastActive{ };
 };

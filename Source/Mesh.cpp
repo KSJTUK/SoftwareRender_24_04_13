@@ -483,7 +483,7 @@ void CAxisMesh::Render(HDC hDCFrameBuffer)
 }
 
 CCylinderMesh::CCylinderMesh(float fTopRadius, float fBottomRadius, float fHeight, int nCircleSlice) : CMesh(nCircleSlice * 3) {
-	float theta = 2.0 * XM_PI / nCircleSlice;
+	float theta = 2.0f * XM_PI / nCircleSlice;
 	// À­¸é
 	for (int i = 0; i < nCircleSlice; ++i) {
 		float s1 = std::sinf(theta * i);

@@ -151,7 +151,7 @@ bool CAirplaneEnemy::DetectTarget()
 	};
 
 	if (Vector3::Distance(m_xmf3Position, targetPosition) > m_fDetectRange) return false;
-	OutputDebugString(std::wstring{ L"\n" + std::to_wstring(targetPosition.x) + L" " + std::to_wstring(targetPosition.y) + L" " + std::to_wstring(targetPosition.z) + L" \n" }.c_str());
+
 	return true;
 }
 
