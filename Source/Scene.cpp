@@ -361,6 +361,11 @@ void CScene::CheckObjectByBulletCollisions()
 				ppEnemyBullets[j]->Reset();
 				continue;
 			}
+
+			if (m_pPlayer->m_xmOOBB.Intersects(ppEnemyBullets[j]->m_xmOOBB)) {
+				((CExplosiveObject*)m_pPlayer)->m_bBlowingUp = true;
+				ppEnemyBullets[j]->Reset();
+			}
 		}
 	}
 }

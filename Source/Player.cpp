@@ -139,7 +139,7 @@ void CPlayer::Animate(float fElapsedTime)
 {
 	OnUpdateTransform();
 
-	CGameObject::Animate(fElapsedTime);
+	CExplosiveObject::Animate(fElapsedTime);
 }
 
 void CPlayer::OnUpdateTransform()
@@ -153,7 +153,7 @@ void CPlayer::OnUpdateTransform()
 
 void CPlayer::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
-	CGameObject::Render(hDCFrameBuffer, pCamera);
+	CExplosiveObject::Render(hDCFrameBuffer, pCamera);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
