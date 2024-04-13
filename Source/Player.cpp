@@ -171,10 +171,11 @@ CAirplanePlayer::CAirplanePlayer()
 		m_ppBullets[i]->SetActive(false);
 	}
 	
-	CSphereMesh* pSheildMesh = new CSphereMesh(5.0f, 10, 10);
+	CSphereMesh* pSheildMesh = new CSphereMesh(6.0f, 10, 10);
 	m_pSheild = new CSheildObject();
 	m_pSheild->SetColor(RGB(255, 255, 0));
 	m_pSheild->SetMesh(pSheildMesh);
+	m_pSheild->UpdateBoundingBox();
 }
 
 CAirplanePlayer::~CAirplanePlayer()

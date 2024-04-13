@@ -338,6 +338,7 @@ void CScene::CheckObjectByBulletCollisions()
 {
 	// 플레이어가 발사한 총알의 리스트를 가져와서 게임 오브젝트들과의 충돌을 검사한다.
 	CBulletObject** ppBullets = ((CAirplanePlayer*)m_pPlayer)->m_ppBullets;
+	CSheildObject* pSheild = ((CAirplanePlayer*)m_pPlayer)->m_pSheild;
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		for (int j = 0; j < BULLETS; j++)
@@ -347,6 +348,18 @@ void CScene::CheckObjectByBulletCollisions()
 				CExplosiveObject* pExplosiveObject = (CExplosiveObject*)m_ppObjects[i];
 				pExplosiveObject->m_bBlowingUp = true;
 				ppBullets[j]->Reset();
+			}
+		}
+
+		CAirplaneEnemy* pEnemy = (CAirplaneEnemy*)m_ppObjects[i];
+		CBulletObject** ppEnemyBullets = pEnemy->m_ppBullets;
+		for (int j = 0; j < ENEMY_BULLETS; ++j) {
+			if (!ppEnemyBullets[j]->m_bActive)
+				continue;
+
+			if (pSheild->m_bActive && pSheild->m_xmOOBB.Intersects(ppEnemyBullets[j]->m_xmOOBB)) {
+				ppEnemyBullets[j]->Reset();
+				continue;
 			}
 		}
 	}

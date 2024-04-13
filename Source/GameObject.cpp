@@ -459,6 +459,8 @@ void CSheildObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 
 void CSheildObject::Animate(float fElapsedTime)
 {
+	CGameObject::Animate(fElapsedTime);
+
 	m_fElapsedFromLastActive += fElapsedTime;
 
 	if (m_bActive && m_fElapsedFromLastActive > m_fMaxActivedtime) 

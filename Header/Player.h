@@ -3,7 +3,7 @@
 #include "GameObject.h"
 #include "Camera.h"
 
-class CPlayer : public CGameObject
+class CPlayer : public CExplosiveObject
 {
 public:
 	CPlayer();
