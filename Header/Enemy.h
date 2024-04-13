@@ -44,19 +44,24 @@ public:
 	virtual ~CAirplaneEnemy();
 
 public:
+	static void SetTargetObject(CGameObject* pTargetObject) { m_pTargetObejct = pTargetObject; }
+
+public:
 	float						m_fElapsedFromLastFire{ };
-	CPlayer*					m_pPlayer{ };
 	CBulletObject*				m_ppBullets[ENEMY_BULLETS];
 	float						m_fBulletEffectiveRange = 150.0f;
 	bool						m_bDetectedPOlayer{ false };
+
+	inline static CGameObject*	m_pTargetObejct{ nullptr };
 	inline const static float	m_fFireDelay{ 3.0f };
-	inline const static float	m_fDetectRange{ 10.f };
+	inline const static float	m_fDetectRange{ 20.f };
 
 public:
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 
-	bool DetectPlayer(XMFLOAT3& xmf3PlayerPosition);
+	bool DetectTarget();
+	void ChaseTarget();
 	void FireBullet();
 };

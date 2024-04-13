@@ -26,11 +26,37 @@ void CEnemy::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 
 void CEnemy::Rotate(float fPitch, float fYaw, float fRoll)
 {
+	if (fPitch != 0.0f)
+	{
+		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(fPitch));
+		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
+		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
+	}
+	if (fYaw != 0.0f)
+	{
+		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fYaw));
+		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
+		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);
+	}
+	if (fRoll != 0.0f)
+	{
+		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(fRoll));
+		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
+		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);
+	}
+
+	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+	m_xmf3Right = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Up, m_xmf3Look));
+	m_xmf3Up = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Look, m_xmf3Right));
+	m_xmf3MovingDirection = m_xmf3Look;
 }
 
 void CEnemy::Update(float fTimeElapsed)
 {
 	CGameObject::Move(m_xmf3MovingDirection, m_fMovingSpeed);
+	m_xmf3Position.x = m_xmf4x4World._41;
+	m_xmf3Position.y = m_xmf4x4World._42;
+	m_xmf3Position.z = m_xmf4x4World._43;
 }
 
 void CEnemy::OnUpdateTransform()
@@ -43,8 +69,13 @@ void CEnemy::OnUpdateTransform()
 
 void CEnemy::Animate(float fElapsedTime)
 {
-	OnUpdateTransform();
+	Rotate(
+		m_xmf3RotationAxis.x * m_fRotationSpeed * fElapsedTime,
+		m_xmf3RotationAxis.y * m_fRotationSpeed * fElapsedTime,
+		m_xmf3RotationAxis.z * m_fRotationSpeed * fElapsedTime
+	);
 
+	OnUpdateTransform();
 	CExplosiveObject::Animate(fElapsedTime);
 }
 
@@ -81,13 +112,19 @@ void CAirplaneEnemy::OnUpdateTransform()
 
 void CAirplaneEnemy::Animate(float fElapsedTime)
 {
-	CEnemy::Animate(fElapsedTime);
-
-	m_fElapsedFromLastFire += fElapsedTime;
-	if (m_fElapsedFromLastFire > m_fFireDelay) {
-		FireBullet();
-		m_fElapsedFromLastFire = 0.f;
+	if (DetectTarget()) {
+		ChaseTarget();
+		m_fElapsedFromLastFire += fElapsedTime;
+		if (m_fElapsedFromLastFire > m_fFireDelay) {
+			FireBullet();
+			m_fElapsedFromLastFire = 0.f;
+		}
 	}
+	else {
+		SetRotationSpeed(0.0f);
+	}
+
+	CEnemy::Animate(fElapsedTime);
 
 	for (int i = 0; i < ENEMY_BULLETS; ++i)
 		if (m_ppBullets[i]->m_bActive)
@@ -103,9 +140,31 @@ void CAirplaneEnemy::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 			m_ppBullets[i]->Render(hDCFrameBuffer, pCamera);
 }
 
-bool CAirplaneEnemy::DetectPlayer(XMFLOAT3& xmf3PlayerPosition)
+bool CAirplaneEnemy::DetectTarget()
 {
-	
+	if (!m_pTargetObejct) return false;
+
+	XMFLOAT3 targetPosition{
+		m_pTargetObejct->m_xmf4x4World._41,
+		m_pTargetObejct->m_xmf4x4World._42,
+		m_pTargetObejct->m_xmf4x4World._43,
+	};
+
+	if (Vector3::Distance(m_xmf3Position, targetPosition) > m_fDetectRange) return false;
+	return true;
+}
+
+void CAirplaneEnemy::ChaseTarget()
+{
+	XMFLOAT3 targetPosition{
+		m_pTargetObejct->m_xmf4x4World._41,
+		m_pTargetObejct->m_xmf4x4World._42,
+		m_pTargetObejct->m_xmf4x4World._43,
+	};
+
+	m_fMovingSpeed = 3.0f;
+	SetRotationAxis(Vector3::CrossProduct(m_xmf3Look, Vector3::Subtract(targetPosition, m_xmf3Position)));
+	SetRotationSpeed(40.f);
 }
 
 void CAirplaneEnemy::FireBullet()

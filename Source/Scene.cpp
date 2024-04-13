@@ -13,6 +13,7 @@ void CScene::BuildObjects()
 {
 	// 폭발하는 오브젝트의 기본적인 설정을 준비한다.
 	CExplosiveObject::PrepareExplosion();
+	CAirplaneEnemy::SetTargetObject(m_pPlayer);
 
 	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = 200.0f;
 	CWallMesh* pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 30);
@@ -34,7 +35,6 @@ void CScene::BuildObjects()
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	XMFLOAT4X4 xmf4x4RotationTransform = Matrix4x4::RotationYawPitchRoll(0.f, 0.f, XMConvertToRadians(90.f));
-	
 	
 	CAirplaneEnemy* pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
