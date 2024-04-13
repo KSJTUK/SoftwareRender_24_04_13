@@ -38,7 +38,10 @@ public:
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
+	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 };
+
+#define ENEMY_BULLETS 10
 
 class CAirplaneEnemy : public CEnemy
 {
@@ -46,11 +49,20 @@ public:
 	CAirplaneEnemy();
 	virtual ~CAirplaneEnemy();
 
-private:
-	float m_fElapsedFromLastFire{ };
-	inline const static float m_fFireDelay{ 3.0f };
+public:
+	float						m_fElapsedFromLastFire{ };
+	CPlayer*					m_pPlayer{ };
+	CBulletObject*				m_ppBullets[ENEMY_BULLETS];
+	float						m_fBulletEffectiveRange = 150.0f;
+	bool						m_bDetectedPOlayer{ false };
+	inline const static float	m_fFireDelay{ 3.0f };
+	inline const static float	m_fDetectRange{ 10.f };
 
 public:
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
+	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
+
+	bool DetectPlayer(XMFLOAT3& xmf3PlayerPosition);
+	void FireBullet();
 };

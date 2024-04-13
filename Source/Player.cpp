@@ -221,6 +221,7 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 */
 
 	CBulletObject* pBulletObject = NULL;
+	// 활성화 되징 않은 총알을 선택한다.
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (!m_ppBullets[i]->m_bActive)
@@ -230,6 +231,7 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 		}
 	}
 
+	// 선택된 총알이 없다는것은 이미 오브젝트 풀에 있는 모든 총알들이 활성화 상태인것이다.
 	if (pBulletObject)
 	{
 		XMFLOAT3 xmf3Position = GetPosition();

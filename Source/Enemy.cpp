@@ -26,14 +26,35 @@ void CEnemy::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 
 void CEnemy::Move(DWORD dwDirection, float fDistance)
 {
+	if (dwDirection)
+	{
+		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
+		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
+		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
+		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
+		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
+
+		Move(xmf3Shift, true);
+	}
 }
 
 void CEnemy::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
+	if (bUpdateVelocity)
+	{
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
+	}
+	else
+	{
+		m_xmf3Position = Vector3::Add(xmf3Shift, m_xmf3Position);
+	}
 }
 
 void CEnemy::Move(float x, float y, float z)
 {
+	Move(XMFLOAT3(x, y, z), false);
 }
 
 void CEnemy::Rotate(float fPitch, float fYaw, float fRoll)
@@ -64,9 +85,24 @@ void CEnemy::Animate(float fElapsedTime)
 	CExplosiveObject::Animate(fElapsedTime);
 }
 
+void CEnemy::Render(HDC hDCFrameBuffer, CCamera* pCamera)
+{
+	CGameObject::Render(hDCFrameBuffer, pCamera);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 CAirplaneEnemy::CAirplaneEnemy()
 {
+	CCubeMesh* pBulletMesh = new CCubeMesh(1.0f, 4.0f, 1.0f);
+	for (int i = 0; i < ENEMY_BULLETS; i++)
+	{
+		m_ppBullets[i] = new CBulletObject(m_fBulletEffectiveRange);
+		m_ppBullets[i]->SetMesh(pBulletMesh);
+		m_ppBullets[i]->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		m_ppBullets[i]->SetRotationSpeed(360.0f);
+		m_ppBullets[i]->SetMovingSpeed(120.0f);
+		m_ppBullets[i]->SetActive(false);
+	}
 }
 
 CAirplaneEnemy::~CAirplaneEnemy()
@@ -83,4 +119,64 @@ void CAirplaneEnemy::OnUpdateTransform()
 void CAirplaneEnemy::Animate(float fElapsedTime)
 {
 	CEnemy::Animate(fElapsedTime);
+
+	m_fElapsedFromLastFire += fElapsedTime;
+	if (m_fElapsedFromLastFire > m_fFireDelay) {
+		FireBullet();
+		m_fElapsedFromLastFire = 0.f;
+	}
+
+	for (int i = 0; i < ENEMY_BULLETS; ++i)
+		if (m_ppBullets[i]->m_bActive)
+			m_ppBullets[i]->Animate(fElapsedTime);
+}
+
+void CAirplaneEnemy::Render(HDC hDCFrameBuffer, CCamera* pCamera)
+{
+	CEnemy::Render(hDCFrameBuffer, pCamera);
+
+	for (int i = 0; i < ENEMY_BULLETS; ++i)
+		if (m_ppBullets[i]->m_bActive)
+			m_ppBullets[i]->Render(hDCFrameBuffer, pCamera);
+}
+
+bool CAirplaneEnemy::DetectPlayer(XMFLOAT3& xmf3PlayerPosition)
+{
+	
+}
+
+void CAirplaneEnemy::FireBullet()
+{
+	CBulletObject* pBulletObject = NULL;
+	// 활성화 되징 않은 총알을 선택한다.
+	for (int i = 0; i < ENEMY_BULLETS; i++)
+	{
+		if (!m_ppBullets[i]->m_bActive)
+		{
+			pBulletObject = m_ppBullets[i];
+			break;
+		}
+	}
+
+	// 선택된 총알이 없다는것은 이미 오브젝트 풀에 있는 모든 총알들이 활성화 상태인것이다.
+	if (pBulletObject)
+	{
+		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Direction = GetUp();
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, false));
+
+		pBulletObject->m_xmf4x4World = m_xmf4x4World;
+
+		pBulletObject->SetFirePosition(xmf3FirePosition);
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetColor(RGB(255, 0, 0));
+		pBulletObject->SetActive(true);
+
+		//// 락온된 오브젝트가 있으면 총알에도 락온 오브젝트를 설정해준다.
+		//if (pLockedObject)
+		//{
+		//	pBulletObject->m_pLockedObject = pLockedObject;
+		//	pBulletObject->SetColor(RGB(0, 0, 255));
+		//}
+	}
 }
