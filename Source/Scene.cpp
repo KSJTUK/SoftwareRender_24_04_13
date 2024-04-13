@@ -29,7 +29,7 @@ void CScene::BuildObjects()
 	m_pWallsObject->m_pxmf4WallPlanes[5] = XMFLOAT4(0.0f, 0.0f, -1.0f, fHalfDepth);
 	m_pWallsObject->m_xmOOBBPlayerMoveCheck = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth * 0.05f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
-	CAirplaneMesh* pAirPlaneMesh = new CAirplaneMesh(15.f, 15.f, 3.f);
+	CAirplaneMesh* pAirPlaneMesh = new CAirplaneMesh(6.0f, 6.0f, 1.0f);
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];

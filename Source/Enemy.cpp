@@ -24,50 +24,13 @@ void CEnemy::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 {
 }
 
-void CEnemy::Move(DWORD dwDirection, float fDistance)
-{
-	if (dwDirection)
-	{
-		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
-
-		Move(xmf3Shift, true);
-	}
-}
-
-void CEnemy::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
-{
-	if (bUpdateVelocity)
-	{
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
-	}
-	else
-	{
-		m_xmf3Position = Vector3::Add(xmf3Shift, m_xmf3Position);
-	}
-}
-
-void CEnemy::Move(float x, float y, float z)
-{
-	Move(XMFLOAT3(x, y, z), false);
-}
-
 void CEnemy::Rotate(float fPitch, float fYaw, float fRoll)
-{
-}
-
-void CEnemy::SetCameraOffset(XMFLOAT3& xmf3CameraOffset)
 {
 }
 
 void CEnemy::Update(float fTimeElapsed)
 {
-	Move(m_xmf3Velocity, false);
+	CGameObject::Move(m_xmf3MovingDirection, m_fMovingSpeed);
 }
 
 void CEnemy::OnUpdateTransform()
@@ -75,7 +38,7 @@ void CEnemy::OnUpdateTransform()
 	m_xmf4x4World._11 = m_xmf3Right.x; m_xmf4x4World._12 = m_xmf3Right.y; m_xmf4x4World._13 = m_xmf3Right.z;
 	m_xmf4x4World._21 = m_xmf3Up.x; m_xmf4x4World._22 = m_xmf3Up.y; m_xmf4x4World._23 = m_xmf3Up.z;
 	m_xmf4x4World._31 = m_xmf3Look.x; m_xmf4x4World._32 = m_xmf3Look.y; m_xmf4x4World._33 = m_xmf3Look.z;
-	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
+	//m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
 }
 
 void CEnemy::Animate(float fElapsedTime)
@@ -87,7 +50,7 @@ void CEnemy::Animate(float fElapsedTime)
 
 void CEnemy::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
-	CGameObject::Render(hDCFrameBuffer, pCamera);
+	CExplosiveObject::Render(hDCFrameBuffer, pCamera);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
