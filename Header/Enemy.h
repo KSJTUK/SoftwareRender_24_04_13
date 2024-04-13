@@ -44,17 +44,17 @@ public:
 	virtual ~CAirplaneEnemy();
 
 public:
-	static void SetTargetObject(CGameObject* pTargetObject) { m_pTargetObejct = pTargetObject; }
+	static void SetTargetObject(CExplosiveObject* pTargetObject) { m_pTargetObejct = pTargetObject; }
 
 public:
-	float						m_fElapsedFromLastFire{ };
-	CBulletObject*				m_ppBullets[ENEMY_BULLETS];
-	float						m_fBulletEffectiveRange = 150.0f;
-	bool						m_bDetectedPOlayer{ false };
+	float							m_fElapsedFromLastFire{ };
+	CBulletObject*					m_ppBullets[ENEMY_BULLETS];
+	float							m_fBulletEffectiveRange = 150.0f;
+	bool							m_bDetectedPOlayer{ false };
 
-	inline static CGameObject*	m_pTargetObejct{ nullptr };
-	inline const static float	m_fFireDelay{ 3.0f };
-	inline const static float	m_fDetectRange{ 20.f };
+	inline static CExplosiveObject*	m_pTargetObejct{ nullptr };
+	inline const static float		m_fFireDelay{ 3.0f };
+	inline const static float		m_fDetectRange{ 100.f };
 
 public:
 	virtual void OnUpdateTransform();

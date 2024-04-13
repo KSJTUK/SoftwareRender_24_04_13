@@ -149,13 +149,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_RETURN:
 			break;
 		case VK_CONTROL:
-			((CAirplanePlayer*)m_pPlayer)->FireBullet(m_pLockedObject);
+			if (!m_pPlayer->m_bBlowingUp) ((CAirplanePlayer*)m_pPlayer)->FireBullet(m_pLockedObject);
 			m_pLockedObject = NULL;
 			break;
 
 		// 2024 - 04 - 11
 		case VK_SPACE:
-			((CAirplanePlayer*)m_pPlayer)->ActiveShield();
+			if (!m_pPlayer->m_bBlowingUp) ((CAirplanePlayer*)m_pPlayer)->ActiveShield();
 			break;
 		default:
 			m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
@@ -209,7 +209,7 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
-		if (dwDirection) m_pPlayer->Move(dwDirection, 0.15f);
+		if (dwDirection && !m_pPlayer->m_bBlowingUp) m_pPlayer->Move(dwDirection, 0.15f);
 	}
 
 	// GetCaoture 가 현재 윈도우 핸들이 아닌 경우 사용자는 다른 윈도우를 메인으로 사용하고 있는 중이다.

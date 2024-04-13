@@ -53,7 +53,6 @@ void CEnemy::Rotate(float fPitch, float fYaw, float fRoll)
 
 void CEnemy::Update(float fTimeElapsed)
 {
-	CGameObject::Move(m_xmf3MovingDirection, m_fMovingSpeed);
 	m_xmf3Position.x = m_xmf4x4World._41;
 	m_xmf3Position.y = m_xmf4x4World._42;
 	m_xmf3Position.z = m_xmf4x4World._43;
@@ -77,6 +76,7 @@ void CEnemy::Animate(float fElapsedTime)
 
 	OnUpdateTransform();
 	CExplosiveObject::Animate(fElapsedTime);
+	Update(fElapsedTime);
 }
 
 void CEnemy::Render(HDC hDCFrameBuffer, CCamera* pCamera)
@@ -142,7 +142,7 @@ void CAirplaneEnemy::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 
 bool CAirplaneEnemy::DetectTarget()
 {
-	if (!m_pTargetObejct) return false;
+	if (!m_pTargetObejct || m_pTargetObejct->m_bBlowingUp) return false;
 
 	XMFLOAT3 targetPosition{
 		m_pTargetObejct->m_xmf4x4World._41,
@@ -151,6 +151,7 @@ bool CAirplaneEnemy::DetectTarget()
 	};
 
 	if (Vector3::Distance(m_xmf3Position, targetPosition) > m_fDetectRange) return false;
+	OutputDebugString(std::wstring{ L"\n" + std::to_wstring(targetPosition.x) + L" " + std::to_wstring(targetPosition.y) + L" " + std::to_wstring(targetPosition.z) + L" \n" }.c_str());
 	return true;
 }
 
@@ -163,7 +164,8 @@ void CAirplaneEnemy::ChaseTarget()
 	};
 
 	m_fMovingSpeed = 3.0f;
-	SetRotationAxis(Vector3::CrossProduct(m_xmf3Look, Vector3::Subtract(targetPosition, m_xmf3Position)));
+	XMFLOAT3 xmf3ToTarget = Vector3::Subtract(targetPosition, m_xmf3Position);
+	SetRotationAxis(Vector3::CrossProduct(m_xmf3Look, xmf3ToTarget));
 	SetRotationSpeed(40.f);
 }
 
@@ -193,12 +195,5 @@ void CAirplaneEnemy::FireBullet()
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetColor(RGB(255, 0, 0));
 		pBulletObject->SetActive(true);
-
-		//// 락온된 오브젝트가 있으면 총알에도 락온 오브젝트를 설정해준다.
-		//if (pLockedObject)
-		//{
-		//	pBulletObject->m_pLockedObject = pLockedObject;
-		//	pBulletObject->SetColor(RGB(0, 0, 255));
-		//}
 	}
 }
