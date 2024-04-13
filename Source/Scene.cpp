@@ -34,8 +34,9 @@ void CScene::BuildObjects()
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	XMFLOAT4X4 xmf4x4RotationTransform = Matrix4x4::RotationYawPitchRoll(0.f, 0.f, XMConvertToRadians(90.f));
-
-	CExplosiveObject *pExplosiveObject = new CExplosiveObject();
+	
+	
+	CAirplaneEnemy* pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 0));
 	pExplosiveObject->SetPosition(-13.5f, 0.0f, -14.0f);
@@ -46,7 +47,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(10.5f);
 	m_ppObjects[0] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 0, 255));
 	pExplosiveObject->SetPosition(+13.5f, 0.0f, -14.0f);
@@ -56,7 +57,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(8.8f);
 	m_ppObjects[1] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 255, 0));
 	pExplosiveObject->SetPosition(0.0f, +5.0f, 20.0f);
@@ -66,7 +67,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(5.2f);
 	m_ppObjects[2] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 255, 255));
 	pExplosiveObject->SetPosition(0.0f, 0.0f, 0.0f);
@@ -76,7 +77,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(20.4f);
 	m_ppObjects[3] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(128, 0, 255));
 	pExplosiveObject->SetPosition(10.0f, 0.0f, 0.0f);
@@ -86,7 +87,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(6.4f);
 	m_ppObjects[4] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 255));
 	pExplosiveObject->SetPosition(-10.0f, 0.0f, -10.0f);
@@ -96,7 +97,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(8.9f);
 	m_ppObjects[5] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 255));
 	pExplosiveObject->SetPosition(-10.0f, 10.0f, -10.0f);
@@ -106,7 +107,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(9.7f);
 	m_ppObjects[6] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 128));
 	pExplosiveObject->SetPosition(-10.0f, 10.0f, -20.0f);
@@ -116,7 +117,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(15.6f);
 	m_ppObjects[7] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(128, 0, 255));
 	pExplosiveObject->SetPosition(-15.0f, 10.0f, -30.0f);
@@ -126,7 +127,7 @@ void CScene::BuildObjects()
 	pExplosiveObject->SetMovingSpeed(15.0f);
 	m_ppObjects[8] = pExplosiveObject;
 
-	pExplosiveObject = new CExplosiveObject();
+	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 64, 64));
 	pExplosiveObject->SetPosition(+15.0f, 10.0f, 0.0f);

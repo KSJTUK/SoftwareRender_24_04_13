@@ -84,6 +84,7 @@ void CMesh::Render(HDC hDCFrameBuffer)
 
 BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& xmRayOrigin, XMVECTOR& xmRayDirection, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* pfNearHitDistance)
 {
+	// 광선이 삼각형의 내부와 교차하는지 검사한다.
 	float fHitDistance;
 	BOOL bIntersected = TriangleTests::Intersects(xmRayOrigin, xmRayDirection, v0, v1, v2, fHitDistance);
 	if (bIntersected && (fHitDistance < *pfNearHitDistance)) *pfNearHitDistance = fHitDistance;
@@ -534,6 +535,8 @@ CCylinderMesh::~CCylinderMesh() { }
 CSphereMesh::CSphereMesh(float radius, int nYStep, int nSliceDegree) : CMesh(nYStep * nSliceDegree)
 {
 	float thetaXZ = 2.0f * XM_PI / nSliceDegree;
+	// 높이는 -1 ~ 1 사이값 갖도록 cos(0) ~ cos(PI) 만큼 계산
+	// 높이마다 XZ평면의 반지름은 반대로 0 ~ 1, 1 ~ 0 사이 값을 갖도록 sin(0) ~ sin(PI) 만큼 계산
 	float thetaY = XM_PI / nYStep;
 
 	for (int i = 0; i < nYStep; ++i) {
@@ -546,6 +549,7 @@ CSphereMesh::CSphereMesh(float radius, int nYStep, int nSliceDegree) : CMesh(nYS
 			float c1 = std::cosf(thetaXZ * j);
 			float s2 = std::sinf(thetaXZ * (j + 1));
 			float c2 = std::cosf(thetaXZ * (j + 1));
+
 			CPolygon* polygon = new CPolygon(4);
 			polygon->SetVertex(0, CVertex(c1 * fTopRadius, fTopY, s1 * fTopRadius));
 			polygon->SetVertex(1, CVertex(c1 * fBottomRadius, fBottomY, s1 * fBottomRadius));

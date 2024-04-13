@@ -36,7 +36,7 @@ public:
 
 	virtual void Update(float fTimeElapsed = 0.016f);
 
-	virtual void OnUpdateTransform() { }
+	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
 };
 
@@ -46,8 +46,11 @@ public:
 	CAirplaneEnemy();
 	virtual ~CAirplaneEnemy();
 
-public:
+private:
 	float m_fElapsedFromLastFire{ };
-
 	inline const static float m_fFireDelay{ 3.0f };
+
+public:
+	virtual void OnUpdateTransform();
+	virtual void Animate(float fElapsedTime);
 };

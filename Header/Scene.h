@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Camera.h"
 #include "Player.h"
+#include "Enemy.h"
 
 class CScene
 {
