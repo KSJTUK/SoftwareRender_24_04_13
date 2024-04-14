@@ -564,3 +564,7 @@ CSphereMesh::CSphereMesh(float radius, int nYStep, int nSliceDegree) : CMesh(nYS
 }
 
 CSphereMesh::~CSphereMesh() { }
+
+CAlphabetTMesh::CAlphabetTMesh(float fWidth, float fHeight, float fDepth) : CMesh()
+{
+}

@@ -54,6 +54,8 @@ void CPlayer::SetCameraOffset(XMFLOAT3& xmf3CameraOffset)
 
 void CPlayer::Move(DWORD dwDirection, float fDistance)
 {
+	if (!m_bActive) return;
+
 	if (dwDirection)
 	{
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
@@ -200,7 +202,9 @@ void CAirplanePlayer::OnUpdateTransform()
 	CPlayer::OnUpdateTransform();
 
 	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
-	m_pSheild->m_xmf4x4World = m_xmf4x4World;
+	m_pSheild->m_xmf4x4World._41 = m_xmf4x4World._41;
+	m_pSheild->m_xmf4x4World._42 = m_xmf4x4World._42;
+	m_pSheild->m_xmf4x4World._43 = m_xmf4x4World._43;
 }
 
 void CAirplanePlayer::Render(HDC hDCFrameBuffer, CCamera* pCamera)

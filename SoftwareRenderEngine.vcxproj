@@ -153,6 +153,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Alphabet5x3.h" />
     <ClInclude Include="Header\Camera.h" />
     <ClInclude Include="Header\Enemy.h" />
     <ClInclude Include="Header\GameFramework.h" />

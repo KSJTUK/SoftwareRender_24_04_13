@@ -33,8 +33,14 @@ private:
 	_TCHAR						m_pszFrameRate[50];
 
 public:
+	inline static bool			m_bChangeScene{ false };
+
+public:
 	void OnCreate(HINSTANCE hInstance, HWND hMainWnd);
 	void OnDestroy();
+
+	// 24-04-13
+	void StartPlay();
 
 	void BuildFrameBuffer();
 	void ClearFrameBuffer(DWORD dwColor);

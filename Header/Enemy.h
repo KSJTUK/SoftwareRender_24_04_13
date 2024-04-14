@@ -27,16 +27,19 @@ public:
 	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 
 	void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+	void RotateLook(XMFLOAT3& xmf3Axis, float fAngle);
 
 	virtual void Update(float fTimeElapsed = 0.016f);
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
+	virtual void AfterCollision(const CGameObject* pCollObject) { }
 };
 
 #define ENEMY_BULLETS 10
 
+class CPlayer;
 class CAirplaneEnemy : public CEnemy
 {
 public:
@@ -44,24 +47,30 @@ public:
 	virtual ~CAirplaneEnemy();
 
 public:
-	static void SetTargetObject(CExplosiveObject* pTargetObject) { m_pTargetObejct = pTargetObject; }
+	static void SetTargetObject(CPlayer* pTargetObject) { m_pTargetObejct = pTargetObject; }
 
 public:
 	float							m_fElapsedFromLastFire{ };
+	float							m_fElapsedChangingDirection{ };
 	CBulletObject*					m_ppBullets[ENEMY_BULLETS];
 	float							m_fBulletEffectiveRange = 150.0f;
-	bool							m_bDetectedPOlayer{ false };
+	bool							m_bDetectedPlayer{ false };
+	bool							m_bDebug{ false };
+	XMFLOAT3						m_xmf3ChaseRotateAxis{ };
 
-	inline static CExplosiveObject*	m_pTargetObejct{ nullptr };
-	inline const static float		m_fFireDelay{ 3.0f };
-	inline const static float		m_fDetectRange{ 100.f };
+	inline static					CPlayer* m_pTargetObejct{ nullptr };
+	inline const static float		m_fFireDelay{ 5.0f };
+	inline const static float		m_fDetectRange{ 50.f };
+	inline const static float		m_fChangeDirectionTime{ 5.0f };
+	inline const static float		m_fChaseRotateSpeed{ 40.f };
 
 public:
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
+	virtual void AfterCollision(const CGameObject* pCollObject);
 
 	bool DetectTarget();
-	void ChaseTarget();
+	void ChaseTarget(float fElapsedTime);
 	void FireBullet();
 };

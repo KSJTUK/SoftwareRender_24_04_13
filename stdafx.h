@@ -20,9 +20,10 @@
 #pragma comment(lib, "winmm.lib")
 
 #include <string>
+#include <random>
 
-#include <DirectXMath.h>
 #include <DirectXPackedVector.h>
+#include <DirectXMath.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 
@@ -49,6 +50,23 @@ using namespace DirectX::PackedVector;
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
+inline bool IsZero(XMFLOAT3& xmf3Value) { return (IsZero(xmf3Value.x) && IsZero(xmf3Value.y) && IsZero(xmf3Value.z)); }
+
+inline std::random_device rd{ };
+inline std::default_random_engine dre{ rd() };
+
+namespace Random {
+	inline XMFLOAT3 RnadomFloat3(float fMin, float fMax, bool bNormalize = false)
+	{
+		std::uniform_real_distribution<float> urd{ fMin, fMax };
+
+		XMFLOAT3 xmf3Result{ urd(dre), urd(dre), urd(dre) };
+		if (bNormalize)
+			XMStoreFloat3(&xmf3Result, XMVector3Normalize(XMLoadFloat3(&xmf3Result)));
+
+		return(xmf3Result);
+	}
+}
 
 namespace Vector3
 {
@@ -131,7 +149,7 @@ namespace Vector3
 	inline float Angle(XMVECTOR& xmvVector1, XMVECTOR& xmvVector2)
 	{
 		XMVECTOR xmvAngle = XMVector3AngleBetweenNormals(xmvVector1, xmvVector2);
-		return(XMVectorGetX(XMVectorACos(xmvAngle)));
+		return(XMVectorGetX(xmvAngle));
 	}
 
 	inline float Angle(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)

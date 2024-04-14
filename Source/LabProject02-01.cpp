@@ -9,6 +9,7 @@
 
 // 전역 변수:
 HINSTANCE hInst;								// 현재 인스턴스입니다.
+const LPWSTR lpClientName = L"SoftwareRenderer";
 
 CGameFramework		gGameFramework;
 
@@ -31,7 +32,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	HACCEL hAccelTable;
 
 	MyRegisterClass(hInstance);
-
+	
 	// 응용 프로그램 초기화를 수행합니다.
 	if (!InitInstance(hInstance, nCmdShow))
 	{
@@ -89,9 +90,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LABPROJECT0201));
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
-	wcex.lpszClassName = _T("SoftwareRenderer");
+	wcex.lpszClassName = lpClientName;
 
 	return RegisterClassEx(&wcex);
 }
@@ -113,8 +116,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	RECT rc = { 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT };
 	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
 	AdjustWindowRect(&rc, dwStyle, FALSE);
-	HWND hMainWnd = CreateWindow(_T("SoftwareRenderer"), _T("SoftwareRenderer"), dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
-	OutputDebugStringA(std::to_string(::GetLastError()).c_str());
+	HWND hMainWnd = CreateWindow(lpClientName, lpClientName, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT,
+		rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
 	if (!hMainWnd) return(FALSE);
 
 	gGameFramework.OnCreate(hInstance, hMainWnd);

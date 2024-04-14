@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Header/Scene.h"
 #include "Header/GraphicsPipeline.h"
+#include "Header/GameFramework.h"
+#include "Alphabet5x3.h"
 
 CScene::CScene(CPlayer* pPlayer)
 {
@@ -183,22 +185,144 @@ void CScene::CheckObjectByBulletCollisions()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CStartScene::BuildObjects()
 {
+	int nAlphas[5] = { S, T, A, R, T };
+	m_nObjects = 1 + CNT_S + CNT_T + CNT_A + CNT_R + CNT_T;
+	m_ppObjects = new CGameObject*[m_nObjects];
+	m_pPlayer->m_bActive = false;
+
+	int nObjects = 0;
+	CCubeMesh* pButtonMesh = new CCubeMesh(25.f, 15.f, 0.0f);
+	CGameObject* pButton = new CGameObject();
+	pButton->SetMesh(pButtonMesh);
+	pButton->SetColor(RGB(0, 0, 0));
+	pButton->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[nObjects++] = pButton;
+
+	float fLeft = -18.f;
+	float fTop = 6.0f;
+	float fXSize = 2.0f;
+	float fYSize = 3.0f;
+	float fZ = 14.0f;
+	CCubeMesh* pCubeMesh = new CCubeMesh(fXSize, fYSize, fXSize);
+
+	int nWidth = 0;
+	int nHeight = 0;
+	int nColumn = 3;
+	int nRow = 5;
+	int nLoopInterval = nRow * nColumn;
+	for (int alpha = 0; alpha < _countof(nAlphas); ++alpha) {
+		for (int i = 0; i < nLoopInterval; ++i) {
+			int alphabet = nAlphas[alpha];
+			nWidth = i % nColumn;
+			nHeight = i / nColumn;
+
+			if (fAlphabet[alphabet][nHeight][nWidth] > 0.0f) {
+				float x = fLeft + nWidth * fXSize;
+				float y = fTop - nHeight * fYSize;
+				CRotatingObject* pTextObject = new CRotatingObject();
+				pTextObject->SetMesh(pCubeMesh);
+				pTextObject->SetColor(RGB(0, 0, 0));
+				pTextObject->SetPosition(x, y, fZ);
+				pTextObject->SetRotationAxis(XMFLOAT3(0.f, 1.f, 0.f));
+				m_ppObjects[nObjects++] = pTextObject;
+			}
+		}
+		fLeft += fXSize * 4.0f;
+	}
 }
 
 void CStartScene::ReleaseObjects()
 {
+	for (int i = 0; i < m_nObjects; ++i)
+		if (m_ppObjects[i])
+			delete m_ppObjects[i];
+
+	if (m_ppObjects) delete[] m_ppObjects;
 }
 
 void CStartScene::Animate(float fElapsedTime)
 {
+	for (int i = 0; i < m_nObjects; ++i)
+		if (m_ppObjects[i]->m_bActive)
+			m_ppObjects[i]->Animate(fElapsedTime);
 }
 
 void CStartScene::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
+	// 그래픽 파이프라인에 뷰포트정보와 카메라, 투영행렬 정보를 설정한다.
+	CGraphicsPipeline::SetViewport(&pCamera->m_Viewport);
+	CGraphicsPipeline::SetViewPerspectiveProjectTransform(&pCamera->m_xmf4x4ViewPerspectiveProject);
+
+	for (int i = 0; i < m_nObjects; ++i)
+		if (m_ppObjects[i])
+			m_ppObjects[i]->Render(hDCFrameBuffer, pCamera);
 }
 
 void CStartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+		::SetCapture(hWnd);
+		if (nMessageID == WM_LBUTTONDOWN)
+		{
+			CGameFramework::m_bChangeScene = true;
+		}
+		break;
+	case WM_LBUTTONUP:
+		::ReleaseCapture();
+		break;
+	case WM_MOUSEMOVE:
+		if (m_ppObjects[0] == PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pPlayer->m_pCamera))
+		{
+			m_ppObjects[0]->SetColor(RGB(255, 0, 255));
+
+			int nObjects = 1;
+			for (int i = nObjects; i < nObjects + CNT_S; ++i) {
+				m_ppObjects[i]->SetColor(RGB(255, 0, 0));
+				((CRotatingObject*)m_ppObjects[i])->SetRotationSpeed(30.0f);
+			}
+			nObjects += CNT_S;
+
+			for (int i = nObjects; i < nObjects + CNT_T; ++i) {
+				m_ppObjects[i]->SetColor(RGB(0, 255, 0));
+				((CRotatingObject*)m_ppObjects[i])->SetRotationSpeed(30.0f);
+			}
+			nObjects += CNT_T;
+
+			for (int i = nObjects; i < nObjects + CNT_A; ++i) {
+				m_ppObjects[i]->SetColor(RGB(0, 0, 255));
+				((CRotatingObject*)m_ppObjects[i])->SetRotationSpeed(30.0f);
+			}
+			nObjects += CNT_A;
+
+			for (int i = nObjects; i < nObjects + CNT_R; ++i) {
+				m_ppObjects[i]->SetColor(RGB(255, 255, 0));
+				((CRotatingObject*)m_ppObjects[i])->SetRotationSpeed(30.0f);
+			}
+			nObjects += CNT_R;
+
+			for (int i = nObjects; i < nObjects + CNT_T; ++i) {
+				m_ppObjects[i]->SetColor(RGB(255, 0, 255));
+				((CRotatingObject*)m_ppObjects[i])->SetRotationSpeed(30.0f);
+			}
+			nObjects += CNT_T;
+
+		}
+		else
+		{
+			for (int i = 0; i < m_nObjects; ++i)
+				m_ppObjects[i]->SetColor(RGB(0, 0, 0));
+
+			for (int i = 1; i < m_nObjects; ++i) {
+				((CRotatingObject*)m_ppObjects[i])->SetRotationSpeed(0.0f);
+				((CRotatingObject*)m_ppObjects[i])->SetRotationTransform(&Matrix4x4::Identity());
+			}
+		}
+		break;
+	default:
+		break;
+	}
 }
 
 void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -211,6 +335,8 @@ void CPlayScene::BuildObjects()
 	// 폭발하는 오브젝트의 기본적인 설정을 준비한다.
 	CExplosiveObject::PrepareExplosion();
 	CAirplaneEnemy::SetTargetObject(m_pPlayer);
+
+	m_pPlayer->m_bActive = true;
 
 	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = 200.0f;
 	CWallMesh* pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 30);
@@ -231,15 +357,11 @@ void CPlayScene::BuildObjects()
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
-	XMFLOAT4X4 xmf4x4RotationTransform = Matrix4x4::RotationYawPitchRoll(0.f, 0.f, XMConvertToRadians(90.f));
-
+	
 	CAirplaneEnemy* pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 0));
 	pExplosiveObject->SetPosition(-13.5f, 0.0f, -14.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	pExplosiveObject->SetRotationTransform(&xmf4x4RotationTransform);
-	//pExplosiveObject->SetRotationSpeed(90.0f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 0.0f));
 	pExplosiveObject->SetMovingSpeed(10.5f);
 	m_ppObjects[0] = pExplosiveObject;
@@ -247,9 +369,7 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 0, 255));
-	pExplosiveObject->SetPosition(+13.5f, 0.0f, -14.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//pExplosiveObject->SetRotationSpeed(180.0f);
+	pExplosiveObject->SetPosition(0.0f, 10.0f, 20.0f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(-1.0f, 0.0f, 0.0f));
 	pExplosiveObject->SetMovingSpeed(8.8f);
 	m_ppObjects[1] = pExplosiveObject;
@@ -258,8 +378,6 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 255, 0));
 	pExplosiveObject->SetPosition(0.0f, +5.0f, 20.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//pExplosiveObject->SetRotationSpeed(30.15f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(1.0f, -1.0f, 0.0f));
 	pExplosiveObject->SetMovingSpeed(5.2f);
 	m_ppObjects[2] = pExplosiveObject;
@@ -267,7 +385,7 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 255, 255));
-	pExplosiveObject->SetPosition(0.0f, 0.0f, 0.0f);
+	pExplosiveObject->SetPosition(0.0f, 0.0f, 15.0f);
 	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 	pExplosiveObject->SetRotationSpeed(40.6f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 1.0f));
@@ -278,8 +396,6 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(128, 0, 255));
 	pExplosiveObject->SetPosition(10.0f, 0.0f, 0.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//pExplosiveObject->SetRotationSpeed(50.06f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(0.0f, 1.0f, 1.0f));
 	pExplosiveObject->SetMovingSpeed(6.4f);
 	m_ppObjects[4] = pExplosiveObject;
@@ -288,8 +404,6 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 255));
 	pExplosiveObject->SetPosition(-10.0f, 0.0f, -10.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//pExplosiveObject->SetRotationSpeed(60.06f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 1.0f));
 	pExplosiveObject->SetMovingSpeed(8.9f);
 	m_ppObjects[5] = pExplosiveObject;
@@ -298,8 +412,6 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 255));
 	pExplosiveObject->SetPosition(-10.0f, 10.0f, -10.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//pExplosiveObject->SetRotationSpeed(60.06f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	pExplosiveObject->SetMovingSpeed(9.7f);
 	m_ppObjects[6] = pExplosiveObject;
@@ -308,8 +420,6 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 128));
 	pExplosiveObject->SetPosition(-10.0f, 10.0f, -20.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//pExplosiveObject->SetRotationSpeed(70.06f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(-1.0f, 1.0f, 1.0f));
 	pExplosiveObject->SetMovingSpeed(15.6f);
 	m_ppObjects[7] = pExplosiveObject;
@@ -318,8 +428,6 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(128, 0, 255));
 	pExplosiveObject->SetPosition(-15.0f, 10.0f, -30.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//pExplosiveObject->SetRotationSpeed(90.06f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, -1.0f));
 	pExplosiveObject->SetMovingSpeed(15.0f);
 	m_ppObjects[8] = pExplosiveObject;
@@ -328,8 +436,6 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 64, 64));
 	pExplosiveObject->SetPosition(+15.0f, 10.0f, 0.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//pExplosiveObject->SetRotationSpeed(90.06f);
 	pExplosiveObject->SetMovingDirection(XMFLOAT3(-0.0f, 0.0f, -1.0f));
 	pExplosiveObject->SetMovingSpeed(15.0f);
 	m_ppObjects[9] = pExplosiveObject;

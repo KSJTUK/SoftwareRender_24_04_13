@@ -27,6 +27,14 @@ void CGameFramework::OnDestroy()
 	if (m_hDCFrameBuffer) ::DeleteDC(m_hDCFrameBuffer);
 }
 
+void CGameFramework::StartPlay()
+{
+	delete m_pScene;
+	m_pScene = new CPlayScene(m_pPlayer);
+	m_pScene->BuildObjects();
+	m_bChangeScene = false;
+}
+
 void CGameFramework::BuildFrameBuffer()
 {
 	// 현재 윈도우의 화면 영역을 얻어온다
@@ -90,7 +98,7 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetCamera(pCamera);
 	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
 
-	m_pScene = new CPlayScene(m_pPlayer);
+	m_pScene = new CStartScene(m_pPlayer);
 	m_pScene->BuildObjects();
 }
 
@@ -108,6 +116,12 @@ void CGameFramework::ReleaseObjects()
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+
+	if (m_bChangeScene) {
+		::GetCursorPos(&m_ptOldCursorPos);
+		StartPlay();
+		return;
+	}
 
 	switch (nMessageID)
 	{
@@ -260,5 +274,3 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
-
-

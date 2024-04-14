@@ -104,6 +104,7 @@ public:
 
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
+	virtual void AfterCollision(const CGameObject* pCollObject) { }
 
 public:
 	static CMesh*				m_pExplosionMesh;
@@ -122,6 +123,7 @@ public:
 	BoundingOrientedBox			m_xmOOBBPlayerMoveCheck = BoundingOrientedBox();
 	XMFLOAT4					m_pxmf4WallPlanes[6];
 
+	virtual void AfterCollision(const CGameObject* pCollObject) { }
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 };
 
@@ -157,7 +159,8 @@ public:
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 };
 
-class CSheildObject : public CGameObject {
+class CSheildObject : public CGameObject 
+{
 public:
 	CSheildObject();
 	virtual ~CSheildObject();
@@ -169,7 +172,7 @@ public:
 	virtual void ActiveSheild();
 
 private:
-	const float m_fMaxActivedtime{ 100.f };
-	const float m_fActiveLimitTime{ 3.f };
-	float m_fElapsedFromLastActive{ };
+	const float		m_fMaxActivedtime{ 100.f };
+	const float		m_fActiveLimitTime{ 3.f };
+	float			m_fElapsedFromLastActive{ };
 };
