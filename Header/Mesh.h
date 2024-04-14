@@ -99,9 +99,3 @@ public:
 	CSphereMesh(float radius, int nYStep, int nSliceDegree);
 	virtual ~CSphereMesh();
 };
-
-class CAlphabetTMesh : public CMesh {
-public:
-	CAlphabetTMesh(float fWidth = 6.0f, float fHeight = 6.0f, float fDepth = 6.0f);
-	virtual ~CAlphabetTMesh() { }
-};

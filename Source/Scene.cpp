@@ -39,7 +39,7 @@ CGameObject* CScene::PickObjectPointedByCursor(int xClient, int yClient, CCamera
 	return(pNearestObject);
 }
 
-void CScene::CheckObjectByObjectCollisions()
+void CScene::CheckObjectByObjectCollisions(float fElapsedTime)
 {
 	// 오브젝트들 간의 충돌검사를 진행한다.
 	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->m_pObjectCollided = NULL;
@@ -69,8 +69,8 @@ void CScene::CheckObjectByObjectCollisions()
 			m_ppObjects[i]->m_pObjectCollided->m_fMovingSpeed = fMovingSpeed;
 			
 			// 2024 - 04 - 11
-			m_ppObjects[i]->AfterCollision(m_ppObjects[i]->m_pObjectCollided);
-			m_ppObjects[i]->m_pObjectCollided->AfterCollision(m_ppObjects[i]);
+			m_ppObjects[i]->AfterCollision(m_ppObjects[i]->m_pObjectCollided, fElapsedTime);
+			m_ppObjects[i]->m_pObjectCollided->AfterCollision(m_ppObjects[i], fElapsedTime);
 
 			// 충돌 내용을 지운다 -> 중복 연산 방지
 			m_ppObjects[i]->m_pObjectCollided->m_pObjectCollided = NULL;
@@ -79,7 +79,7 @@ void CScene::CheckObjectByObjectCollisions()
 	}
 }
 
-void CScene::CheckObjectByWallCollisions()
+void CScene::CheckObjectByWallCollisions(float fElapsedTime)
 {
 	for (int i = 0; i < m_nObjects; i++)
 	{
@@ -106,6 +106,7 @@ void CScene::CheckObjectByWallCollisions()
 				XMVECTOR xmvNormal = XMVectorSet(m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].x, m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].y, m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].z, 0.0f);
 				XMVECTOR xmvReflect = XMVector3Reflect(XMLoadFloat3(&m_ppObjects[i]->m_xmf3MovingDirection), xmvNormal);
 				XMStoreFloat3(&m_ppObjects[i]->m_xmf3MovingDirection, xmvReflect);
+				m_ppObjects[i]->AfterWallCollision(fElapsedTime);
 			}
 			break;
 		}
@@ -126,6 +127,7 @@ void CScene::CheckObjectByWallCollisions()
 				XMVECTOR xmvNormal = XMVectorSet(m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].x, m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].y, m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].z, 0.0f);
 				XMVECTOR xmvReflect = XMVector3Reflect(XMLoadFloat3(&m_ppObjects[i]->m_xmf3MovingDirection), xmvNormal);
 				XMStoreFloat3(&m_ppObjects[i]->m_xmf3MovingDirection, xmvReflect);
+				m_ppObjects[i]->AfterWallCollision(fElapsedTime);
 			}
 			break;
 		}
@@ -143,7 +145,9 @@ void CScene::CheckPlayerByWallCollision()
 
 	// 평면과 플레이어가 서로 교차하는 경우 벽의 위치를 플레이어의 위치로 이동시킨다
 	// 결과적으로는 플레이어가 벽의 중앙에 위치하는 것처럼 보이게 된다.
-	if (!xmOOBBPlayerMoveCheck.Intersects(m_pPlayer->m_xmOOBB)) m_pWallsObject->SetPosition(m_pPlayer->m_xmf3Position);
+	if (!xmOOBBPlayerMoveCheck.Intersects(m_pPlayer->m_xmOOBB))/* m_pWallsObject->SetPosition(m_pPlayer->m_xmf3Position);*/
+		if (!m_pPlayer->m_bBlowingUp) 
+			m_pPlayer->CancelMove();
 }
 
 void CScene::CheckObjectByBulletCollisions()
@@ -338,7 +342,7 @@ void CPlayScene::BuildObjects()
 
 	m_pPlayer->m_bActive = true;
 
-	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = 200.0f;
+	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = 100.f;
 	CWallMesh* pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 30);
 
 	m_pWallsObject = new CWallsObject();
@@ -351,7 +355,7 @@ void CPlayScene::BuildObjects()
 	m_pWallsObject->m_pxmf4WallPlanes[3] = XMFLOAT4(0.0f, -1.0f, 0.0f, fHalfHeight);
 	m_pWallsObject->m_pxmf4WallPlanes[4] = XMFLOAT4(0.0f, 0.0f, +1.0f, fHalfDepth);
 	m_pWallsObject->m_pxmf4WallPlanes[5] = XMFLOAT4(0.0f, 0.0f, -1.0f, fHalfDepth);
-	m_pWallsObject->m_xmOOBBPlayerMoveCheck = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth * 0.05f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	m_pWallsObject->m_xmOOBBPlayerMoveCheck = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth * 0.5f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	CAirplaneMesh* pAirPlaneMesh = new CAirplaneMesh(6.0f, 6.0f, 1.0f);
 
@@ -361,83 +365,61 @@ void CPlayScene::BuildObjects()
 	CAirplaneEnemy* pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 0));
-	pExplosiveObject->SetPosition(-13.5f, 0.0f, -14.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 0.0f));
-	pExplosiveObject->SetMovingSpeed(10.5f);
+	pExplosiveObject->SetPosition(-13.5f, 0.0f, -24.0f);
 	m_ppObjects[0] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 0, 255));
-	pExplosiveObject->SetPosition(0.0f, 10.0f, 20.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(-1.0f, 0.0f, 0.0f));
-	pExplosiveObject->SetMovingSpeed(8.8f);
+	pExplosiveObject->SetPosition(0.0f, 10.0f, 30.0f);
 	m_ppObjects[1] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 255, 0));
-	pExplosiveObject->SetPosition(0.0f, +5.0f, 20.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(1.0f, -1.0f, 0.0f));
-	pExplosiveObject->SetMovingSpeed(5.2f);
+	pExplosiveObject->SetPosition(0.0f, 0.0f, 15.0f);
 	m_ppObjects[2] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(0, 255, 255));
-	pExplosiveObject->SetPosition(0.0f, 0.0f, 15.0f);
-	pExplosiveObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	pExplosiveObject->SetRotationSpeed(40.6f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 1.0f));
-	pExplosiveObject->SetMovingSpeed(20.4f);
+	pExplosiveObject->SetPosition(-20.0f, 0.0f, 15.0f);
 	m_ppObjects[3] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(128, 0, 255));
-	pExplosiveObject->SetPosition(10.0f, 0.0f, 0.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(0.0f, 1.0f, 1.0f));
-	pExplosiveObject->SetMovingSpeed(6.4f);
+	pExplosiveObject->SetPosition(15.0f, 0.0f, 0.0f);
 	m_ppObjects[4] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 255));
 	pExplosiveObject->SetPosition(-10.0f, 0.0f, -10.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(1.0f, 0.0f, 1.0f));
-	pExplosiveObject->SetMovingSpeed(8.9f);
 	m_ppObjects[5] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 255));
-	pExplosiveObject->SetPosition(-10.0f, 10.0f, -10.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	pExplosiveObject->SetMovingSpeed(9.7f);
+	pExplosiveObject->SetPosition(-10.0f, 10.0f, -5.0f);
 	m_ppObjects[6] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 0, 128));
-	pExplosiveObject->SetPosition(-10.0f, 10.0f, -20.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(-1.0f, 1.0f, 1.0f));
-	pExplosiveObject->SetMovingSpeed(15.6f);
+	pExplosiveObject->SetPosition(-40.0f, 10.0f, -25.0f);
 	m_ppObjects[7] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(128, 0, 255));
 	pExplosiveObject->SetPosition(-15.0f, 10.0f, -30.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, -1.0f));
-	pExplosiveObject->SetMovingSpeed(15.0f);
 	m_ppObjects[8] = pExplosiveObject;
 
 	pExplosiveObject = new CAirplaneEnemy();
 	pExplosiveObject->SetMesh(pAirPlaneMesh);
 	pExplosiveObject->SetColor(RGB(255, 64, 64));
-	pExplosiveObject->SetPosition(+15.0f, 10.0f, 0.0f);
-	pExplosiveObject->SetMovingDirection(XMFLOAT3(-0.0f, 0.0f, -1.0f));
-	pExplosiveObject->SetMovingSpeed(15.0f);
+	pExplosiveObject->SetPosition(+15.0f, 10.0f, 30.0f);
 	m_ppObjects[9] = pExplosiveObject;
 
 #ifdef _WITH_DRAW_AXIS
@@ -469,9 +451,9 @@ void CPlayScene::Animate(float fElapsedTime)
 
 	CheckPlayerByWallCollision();
 
-	CheckObjectByWallCollisions();
+	CheckObjectByWallCollisions(fElapsedTime);
 
-	CheckObjectByObjectCollisions();
+	CheckObjectByObjectCollisions(fElapsedTime);
 
 	CheckObjectByBulletCollisions();
 }

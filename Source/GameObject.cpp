@@ -169,11 +169,6 @@ void CGameObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 	if (pCamera->IsInFrustum(m_xmOOBB)) CGameObject::Render(hDCFrameBuffer, &m_xmf4x4World, m_pMesh);
 }
 
-// 2024 - 04 - 11
-void CGameObject::AfterCollision(const CGameObject* pObjectCollided) 
-{
-}
-
 void CGameObject::GenerateRayForPicking(XMVECTOR& xmvPickPosition, XMMATRIX& xmmtxView, XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection)
 {
 	XMMATRIX xmmtxToModel = XMMatrixInverse(NULL, XMLoadFloat4x4(&m_xmf4x4World) * xmmtxView);

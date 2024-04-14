@@ -66,7 +66,8 @@ public:
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 
 	// 2024 - 04 - 11
-	virtual void AfterCollision(const CGameObject* pCollObject);
+	virtual void AfterCollision(const CGameObject* pCollObject, float fElapsedTime) { }
+	virtual void AfterWallCollision(float fElapsedTime) { }
 
 	void GenerateRayForPicking(XMVECTOR& xmvPickPosition, XMMATRIX& xmmtxView, XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection);
 	int PickObjectByRayIntersection(XMVECTOR& xmPickPosition, XMMATRIX& xmmtxView, float* pfHitDistance);
@@ -104,7 +105,6 @@ public:
 
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
-	virtual void AfterCollision(const CGameObject* pCollObject) { }
 
 public:
 	static CMesh*				m_pExplosionMesh;
@@ -121,9 +121,8 @@ public:
 
 public:
 	BoundingOrientedBox			m_xmOOBBPlayerMoveCheck = BoundingOrientedBox();
-	XMFLOAT4					m_pxmf4WallPlanes[6];
+	XMFLOAT4					m_pxmf4WallPlanes[6]{ };
 
-	virtual void AfterCollision(const CGameObject* pCollObject) { }
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 };
 

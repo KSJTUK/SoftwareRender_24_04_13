@@ -232,8 +232,8 @@ void CGameFramework::ProcessInput()
 		SetCursor(NULL);
 		POINT ptCursorPos;
 		GetCursorPos(&ptCursorPos);
-		float cxMouseDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		float cyMouseDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+		float cxMouseDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 2.2f;
+		float cyMouseDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 2.2f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		if (cxMouseDelta || cyMouseDelta)
 		{
@@ -258,7 +258,7 @@ void CGameFramework::AnimateObjects()
 void CGameFramework::FrameAdvance()
 {    
 	// 타이머 업데이트 -> 사용자 입력처리 -> 오브젝트의 움직임 처리 -> 렌더링 -> Present
-	m_GameTimer.Tick(0.0f);
+	m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
 

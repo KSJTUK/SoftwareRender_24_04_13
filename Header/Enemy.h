@@ -20,6 +20,8 @@ public:
 	float           			m_fYaw = 0.0f;
 	float           			m_fRoll = 0.0f;
 
+	std::queue<XMFLOAT3>		m_qxmf3RotateDests{ };
+
 public:
 	void SetPosition(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
@@ -28,13 +30,15 @@ public:
 
 	void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	void RotateLook(XMFLOAT3& xmf3Axis, float fAngle);
+	void RotateToSmoothly(XMFLOAT3& xmf3Dest, float fSpeed);
+	
+	void CancelLastMove(float fElapsedTime);
 
 	virtual void Update(float fTimeElapsed = 0.016f);
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
-	virtual void AfterCollision(const CGameObject* pCollObject) { }
 };
 
 #define ENEMY_BULLETS 10
@@ -47,7 +51,7 @@ public:
 	virtual ~CAirplaneEnemy();
 
 public:
-	static void SetTargetObject(CPlayer* pTargetObject) { m_pTargetObejct = pTargetObject; }
+	static void SetTargetObject(CPlayer* pTargetObject) { m_pTargetPlayer = pTargetObject; }
 
 public:
 	float							m_fElapsedFromLastFire{ };
@@ -58,17 +62,18 @@ public:
 	bool							m_bDebug{ false };
 	XMFLOAT3						m_xmf3ChaseRotateAxis{ };
 
-	inline static					CPlayer* m_pTargetObejct{ nullptr };
+	inline static CPlayer*			m_pTargetPlayer{ nullptr };
 	inline const static float		m_fFireDelay{ 5.0f };
-	inline const static float		m_fDetectRange{ 50.f };
+	inline const static float		m_fDetectRange{ 20.f };
 	inline const static float		m_fChangeDirectionTime{ 5.0f };
-	inline const static float		m_fChaseRotateSpeed{ 40.f };
+	inline const static float		m_fChaseRotateSpeed{ 100.f };
 
 public:
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
-	virtual void AfterCollision(const CGameObject* pCollObject);
+	virtual void AfterCollision(const CGameObject* pCollObject, float fElapsedTime);
+	virtual void AfterWallCollision(float fElapsedTime);
 
 	bool DetectTarget();
 	void ChaseTarget(float fElapsedTime);

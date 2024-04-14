@@ -21,6 +21,7 @@
 
 #include <string>
 #include <random>
+#include <queue>
 
 #include <DirectXPackedVector.h>
 #include <DirectXMath.h>
@@ -50,13 +51,14 @@ using namespace DirectX::PackedVector;
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
+inline bool IsEqual(XMFLOAT3& xmf3A, XMFLOAT3& xmf3B) { return (IsEqual(xmf3A.x, xmf3B.x) && IsEqual(xmf3A.y, xmf3B.y) && IsEqual(xmf3A.z, xmf3B.z)); }
 inline bool IsZero(XMFLOAT3& xmf3Value) { return (IsZero(xmf3Value.x) && IsZero(xmf3Value.y) && IsZero(xmf3Value.z)); }
 
 inline std::random_device rd{ };
 inline std::default_random_engine dre{ rd() };
 
 namespace Random {
-	inline XMFLOAT3 RnadomFloat3(float fMin, float fMax, bool bNormalize = false)
+	inline XMFLOAT3 RandomFloat3(float fMin, float fMax, bool bNormalize = false)
 	{
 		std::uniform_real_distribution<float> urd{ fMin, fMax };
 
@@ -65,6 +67,12 @@ namespace Random {
 			XMStoreFloat3(&xmf3Result, XMVector3Normalize(XMLoadFloat3(&xmf3Result)));
 
 		return(xmf3Result);
+	}
+
+	inline float RandomFloat(float fMin, float fMax)
+	{
+		std::uniform_real_distribution<float> urd{ fMin, fMax };
+		return urd(dre);
 	}
 }
 

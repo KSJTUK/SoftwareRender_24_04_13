@@ -12,6 +12,7 @@ CEnemy::~CEnemy()
 void CEnemy::SetPosition(float x, float y, float z)
 {
 	m_xmf3Position = XMFLOAT3(x, y, z);
+	m_qxmf3RotateDests.push(Random::RandomFloat3(-1.0f, 1.0f, true));
 
 	CGameObject::SetPosition(x, y, z);
 }
@@ -66,6 +67,25 @@ void CEnemy::RotateLook(XMFLOAT3& xmf3Axis, float fAngle)
 	m_xmf3MovingDirection = m_xmf3Look;
 }
 
+void CEnemy::RotateToSmoothly(XMFLOAT3& xmf3Dest, float fSpeed)
+{
+	static float fEqualAngleDegree = 5.0f;
+	float fAngle = XMConvertToDegrees(Vector3::Angle(m_xmf3Look, xmf3Dest));
+	if (fAngle < fEqualAngleDegree) {
+		m_qxmf3RotateDests.pop();
+		return;
+	}
+
+	XMFLOAT3 xmf3RotationAxis = Vector3::CrossProduct(m_xmf3Look, xmf3Dest);
+	if (IsZero(xmf3RotationAxis)) xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	RotateLook(xmf3RotationAxis, fSpeed);
+}
+
+void CEnemy::CancelLastMove(float fElapsedTime)
+{
+	Move(m_xmf3Look, -m_fMovingSpeed * fElapsedTime);
+}
+
 void CEnemy::Update(float fTimeElapsed)
 {
 	m_xmf3Position.x = m_xmf4x4World._41;
@@ -83,6 +103,9 @@ void CEnemy::OnUpdateTransform()
 
 void CEnemy::Animate(float fElapsedTime)
 {
+	if (!m_qxmf3RotateDests.empty())
+		RotateToSmoothly(m_qxmf3RotateDests.front(), 180.0f * fElapsedTime);
+
 	OnUpdateTransform();
 	CExplosiveObject::Animate(fElapsedTime);
 	Update(fElapsedTime);
@@ -132,11 +155,11 @@ void CAirplaneEnemy::Animate(float fElapsedTime)
 		}
 	}
 	else {
-		m_fMovingSpeed = 10.f;
 		SetRotationSpeed(0.0f);
-		if (m_fChangeDirectionTime < m_fElapsedChangingDirection) {
-			m_xmf3Look = Random::RnadomFloat3(-1.f, 1.f, true);
-			m_xmf3MovingDirection = m_xmf3Look;
+		m_fMovingSpeed = 10.0f;
+		if (m_fChangeDirectionTime < m_fElapsedChangingDirection && m_qxmf3RotateDests.empty()) {
+			m_qxmf3RotateDests.push(Random::RandomFloat3(-1.0f, 1.0f, true));
+			m_fMovingSpeed = Random::RandomFloat(0.0f, 20.0f);
 			m_fElapsedChangingDirection = 0.0f;
 		}
 	}
@@ -157,20 +180,25 @@ void CAirplaneEnemy::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 			m_ppBullets[i]->Render(hDCFrameBuffer, pCamera);
 }
 
-void CAirplaneEnemy::AfterCollision(const CGameObject* pCollObject)
+void CAirplaneEnemy::AfterCollision(const CGameObject* pCollObject, float fElapsedTime)
 {
-	m_xmf3Look = m_xmf3MovingDirection;
-	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
-	m_xmf3Right = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Up, m_xmf3Look));
-	m_xmf3Up = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Look, m_xmf3Right));
-	m_xmf3MovingDirection = m_xmf3Look;
+	CancelLastMove(fElapsedTime * 1.5f);
+	while (!m_qxmf3RotateDests.empty()) m_qxmf3RotateDests.pop();
+	m_qxmf3RotateDests.push(m_xmf3MovingDirection);
+}
+
+void CAirplaneEnemy::AfterWallCollision(float fElapsedTime)
+{
+	CancelLastMove(fElapsedTime * 1.5f);
+	while (!m_qxmf3RotateDests.empty()) m_qxmf3RotateDests.pop();
+	m_qxmf3RotateDests.push(m_xmf3MovingDirection);
 }
 
 bool CAirplaneEnemy::DetectTarget()
 {
-	if (!m_pTargetObejct || m_pTargetObejct->m_bBlowingUp) return false;
+	if (!m_pTargetPlayer || m_pTargetPlayer->m_bBlowingUp) return false;
 
-	XMFLOAT3 targetPosition = m_pTargetObejct->m_xmf3Position;
+	XMFLOAT3 targetPosition = m_pTargetPlayer->m_xmf3Position;
 	if (Vector3::Distance(m_xmf3Position, targetPosition) > m_fDetectRange) return false;
 
 	return true;
@@ -178,11 +206,11 @@ bool CAirplaneEnemy::DetectTarget()
 
 void CAirplaneEnemy::ChaseTarget(float fElapsedTime)
 {
-	XMFLOAT3 targetPosition = m_pTargetObejct->m_xmf3Position;
+	XMFLOAT3 targetPosition = m_pTargetPlayer->m_xmf3Position;
 
 	m_fMovingSpeed = 0.0f;
 	XMFLOAT3 xmf3ToTarget = Vector3::Subtract(targetPosition, m_xmf3Position);
-	XMFLOAT3 xmf3RotationAxis = Vector3::CrossProduct(m_xmf3Look, xmf3ToTarget, false);
+	XMFLOAT3 xmf3RotationAxis = Vector3::CrossProduct(m_xmf3Look, xmf3ToTarget);
 	float fAngle = XMConvertToDegrees(Vector3::Angle(m_xmf3Look, xmf3ToTarget));
 
 	if (IsZero(xmf3RotationAxis)) {

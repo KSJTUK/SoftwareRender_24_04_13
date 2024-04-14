@@ -15,6 +15,7 @@ CPlayer::~CPlayer()
 void CPlayer::SetPosition(float x, float y, float z)
 {
 	m_xmf3Position = XMFLOAT3(x, y, z);
+	m_dwDefaultColor = RGB(0, 0, 255);
 
 	CGameObject::SetPosition(x, y, z);
 }
@@ -66,6 +67,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance)
 		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
 		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
 
+		m_xmf3LastShift = xmf3Shift;
 		Move(xmf3Shift, true);
 	}
 }
@@ -88,23 +90,35 @@ void CPlayer::Move(float x, float y, float z)
 	Move(XMFLOAT3(x, y, z), false);
 }
 
+void CPlayer::CancelMove()
+{
+	Rotate(-m_fPitch, -m_fYaw, -m_fRoll);
+	Move(Vector3::ScalarProduct(m_xmf3LastShift, -1.0f, false), false);
+
+	m_fPitch = 0.0f; m_fYaw = 0.0f; m_fRoll = 0.0f;
+	m_xmf3LastShift = XMFLOAT3(0.0f, 0.0f, 0.0f);
+}
+
 void CPlayer::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	m_pCamera->Rotate(fPitch, fYaw, fRoll);
 	if (fPitch != 0.0f)
 	{
+		m_fPitch = fPitch;
 		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(fPitch));
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
 	}
 	if (fYaw != 0.0f)
 	{
+		m_fYaw = fYaw;
 		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fYaw));
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);
 	}
 	if (fRoll != 0.0f)
 	{
+		m_fRoll = fRoll;
 		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(fRoll));
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);

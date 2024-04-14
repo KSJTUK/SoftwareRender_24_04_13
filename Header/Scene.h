@@ -29,8 +29,8 @@ public:
 	virtual void BuildObjects() { }
 	virtual void ReleaseObjects() { }
 
-	void CheckObjectByObjectCollisions();
-	void CheckObjectByWallCollisions();
+	void CheckObjectByObjectCollisions(float fElapsedTime);
+	void CheckObjectByWallCollisions(float fElapsedTime);
 	void CheckPlayerByWallCollision();
 	void CheckObjectByBulletCollisions();
 
