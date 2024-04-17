@@ -63,8 +63,8 @@ public:
 	XMFLOAT3						m_xmf3ChaseRotateAxis{ };
 
 	inline static CPlayer*			m_pTargetPlayer{ nullptr };
-	inline const static float		m_fFireDelay{ 5.0f };
-	inline const static float		m_fDetectRange{ 20.f };
+	inline const static float		m_fFireDelay{ 2.5f };
+	inline const static float		m_fDetectRange{ 25.0f };
 	inline const static float		m_fChangeDirectionTime{ 5.0f };
 	inline const static float		m_fChaseRotateSpeed{ 100.f };
 

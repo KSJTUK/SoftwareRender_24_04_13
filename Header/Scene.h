@@ -36,6 +36,7 @@ public:
 
 	virtual void Animate(float fElapsedTime) { }
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera) { }
+	virtual void PrepareChange() { }
 
 	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { }
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { }

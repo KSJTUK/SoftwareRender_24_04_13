@@ -2,6 +2,7 @@
 
 #include "GameObject.h"
 #include "Camera.h"
+#include "Items.h"
 
 class CPlayer : public CExplosiveObject
 {
@@ -65,6 +66,7 @@ public:
 	float						m_fBulletEffectiveRange = 150.0f;
 	CBulletObject*				m_ppBullets[BULLETS];
 	CSheildObject*				m_pSheild{ nullptr };
+	CTurret*					m_pTurret{ nullptr };
 
 	void FireBullet(CGameObject* pLockedObject);
 	void ActiveShield();

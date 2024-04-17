@@ -51,6 +51,9 @@
     <ClCompile Include="Source\Enemy.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Items.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\Camera.h">
@@ -93,6 +96,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Alphabet5x3.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Items.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Items.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

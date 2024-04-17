@@ -49,8 +49,3 @@ float fAlphabet[4][5][3]{
 		1.0f, 0.0f, 1.0f,
 	}
 };
-
-void MakeAlphabet(int nAlphabetType, CGameObject** ppObjects, int nStartIndex, XMFLOAT3& xmf3Position, float fSize=2.0f)
-{
-	auto alphaMat = fAlphabet[nAlphabetType];
-}

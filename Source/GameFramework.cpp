@@ -51,7 +51,7 @@ void CGameFramework::BuildFrameBuffer()
     ::SelectObject(m_hDCFrameBuffer, m_hBitmapFrameBuffer);
 
 	::ReleaseDC(m_hWnd, hDC);
-	// 새로만든 DC의 배경색 모드를 설정해준ㄴ다.
+	// 새로만든 DC의 배경색 모드를 설정해준다.
     ::SetBkMode(m_hDCFrameBuffer, TRANSPARENT);
 }
 

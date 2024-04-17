@@ -21,7 +21,6 @@ XMVECTOR RandomUnitVectorOnSphere()
 	}
 }
 
-
 CGameObject::~CGameObject(void)
 {
 	if (m_pMesh) m_pMesh->Release();

@@ -192,11 +192,17 @@ CAirplanePlayer::CAirplanePlayer()
 	m_pSheild->SetColor(RGB(255, 255, 0));
 	m_pSheild->SetMesh(pSheildMesh);
 	m_pSheild->UpdateBoundingBox();
+
+	m_pTurret = new CTurret(this);
+	m_pTurret->m_fOrbitSpeed = 20.f;
+	//m_pTurret->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	//m_pTurret->SetRotationSpeed(180.f);
 }
 
 CAirplanePlayer::~CAirplanePlayer()
 {
 	if (m_pSheild) delete m_pSheild;
+	if (m_pTurret) delete m_pTurret;
 	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
 }
 
@@ -204,6 +210,8 @@ void CAirplanePlayer::Animate(float fElapsedTime)
 {
 	CPlayer::Animate(fElapsedTime);
 	m_pSheild->Animate(fElapsedTime);
+	if (m_pTurret)
+		m_pTurret->Animate(fElapsedTime);
 
 	for (int i = 0; i < BULLETS; i++)
 	{
@@ -225,6 +233,7 @@ void CAirplanePlayer::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
 	CPlayer::Render(hDCFrameBuffer, pCamera);
 	m_pSheild->Render(hDCFrameBuffer, pCamera);
+	m_pTurret->Render(hDCFrameBuffer, pCamera);
 
 	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]->m_bActive) m_ppBullets[i]->Render(hDCFrameBuffer, pCamera);
 }

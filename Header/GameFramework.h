@@ -23,6 +23,7 @@ private:
     HBITMAP						m_hBitmapSelect = NULL;
 
 	CPlayer*					m_pPlayer = NULL;
+	CScene**					m_ppScenes = NULL;
 	CScene*						m_pScene = NULL;
 	CGameObject*				m_pLockedObject = NULL;
 
@@ -34,10 +35,14 @@ private:
 
 public:
 	inline static bool			m_bChangeScene{ false };
+	static void ChangeNextScene();
 
 public:
 	void OnCreate(HINSTANCE hInstance, HWND hMainWnd);
 	void OnDestroy();
+
+	void NextScene();
+	void PrevScene();
 
 	// 24-04-13
 	void StartPlay();

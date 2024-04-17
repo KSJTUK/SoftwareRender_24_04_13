@@ -104,7 +104,7 @@ void CEnemy::OnUpdateTransform()
 void CEnemy::Animate(float fElapsedTime)
 {
 	if (!m_qxmf3RotateDests.empty())
-		RotateToSmoothly(m_qxmf3RotateDests.front(), 180.0f * fElapsedTime);
+		RotateToSmoothly(m_qxmf3RotateDests.front(), 100.0f * fElapsedTime);
 
 	OnUpdateTransform();
 	CExplosiveObject::Animate(fElapsedTime);

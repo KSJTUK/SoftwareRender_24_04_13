@@ -159,7 +159,7 @@ void CScene::CheckObjectByBulletCollisions()
 	{
 		for (int j = 0; j < BULLETS; j++)
 		{
-			if (ppBullets[j]->m_bActive && m_ppObjects[i]->m_xmOOBB.Intersects(ppBullets[j]->m_xmOOBB))
+			if (ppBullets[j]->m_bActive && !((CExplosiveObject*)m_ppObjects[i])->m_bBlowingUp && m_ppObjects[i]->m_xmOOBB.Intersects(ppBullets[j]->m_xmOOBB))
 			{
 				CExplosiveObject* pExplosiveObject = (CExplosiveObject*)m_ppObjects[i];
 				pExplosiveObject->m_bBlowingUp = true;
