@@ -33,13 +33,16 @@ private:
 
 	_TCHAR						m_pszFrameRate[50];
 
+	std::unordered_map<UINT32, std::function<void(CScene&, float)>> m_mapSceneFunctions{ };
+
 public:
 	inline static bool			m_bChangeScene{ false };
-	static void ChangeNextScene();
 
 public:
 	void OnCreate(HINSTANCE hInstance, HWND hMainWnd);
 	void OnDestroy();
+
+	void PrepareFunctions();
 
 	void NextScene();
 	void PrevScene();

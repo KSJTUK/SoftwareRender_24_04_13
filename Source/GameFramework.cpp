@@ -12,6 +12,8 @@ void CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
 
+	PrepareFunctions();
+
 	BuildFrameBuffer(); 
 
 	BuildObjects(); 
@@ -25,6 +27,15 @@ void CGameFramework::OnDestroy()
 
 	if (m_hBitmapFrameBuffer) ::DeleteObject(m_hBitmapFrameBuffer);
 	if (m_hDCFrameBuffer) ::DeleteDC(m_hDCFrameBuffer);
+}
+
+void CGameFramework::PrepareFunctions()
+{
+	m_mapSceneFunctions.insert(std::make_pair(static_cast<UINT32>(SceneState::SCENE_START), &CScene::SceneStart));
+	m_mapSceneFunctions.insert(std::make_pair(static_cast<UINT32>(SceneState::RUNNING), &CScene::Animate));
+	m_mapSceneFunctions.insert(std::make_pair(static_cast<UINT32>(SceneState::PREPARE_CHANGE), &CScene::PrepareChange));
+	m_mapSceneFunctions.insert(std::make_pair(static_cast<UINT32>(SceneState::CHANGING), &CScene::ChangeAnimation));
+	m_mapSceneFunctions.insert(std::make_pair(static_cast<UINT32>(SceneState::END), &CScene::SceneEnd));
 }
 
 void CGameFramework::StartPlay()
@@ -252,7 +263,9 @@ void CGameFramework::AnimateObjects()
 	// 게임 월드 내의 모든 오브젝트에 대해서 Animate함수를 호출하여 움직임을 업데이트 한다.
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 	if (m_pPlayer) m_pPlayer->Animate(fTimeElapsed);
-	if (m_pScene) m_pScene->Animate(fTimeElapsed);
+	if (m_pScene)
+		m_mapSceneFunctions[m_pScene->GetSceneState()](*m_pScene, fTimeElapsed);
+	//if (m_pScene) m_pScene->Animate(fTimeElapsed);
 }
 
 void CGameFramework::FrameAdvance()

@@ -22,6 +22,8 @@
 #include <string>
 #include <random>
 #include <queue>
+#include <unordered_map>
+#include <functional>
 
 #include <DirectXPackedVector.h>
 #include <DirectXMath.h>

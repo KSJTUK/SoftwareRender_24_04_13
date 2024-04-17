@@ -5,27 +5,39 @@
 #include "Player.h"
 #include "Enemy.h"
 
+enum SceneState : unsigned __int32 {
+	SCENE_START,
+	RUNNING,
+	PREPARE_CHANGE,
+	CHANGING,
+	END,
+};
+
 class CScene
 {
 public:
-	CScene(CPlayer *pPlayer);
+	CScene(CPlayer* pPlayer);
 	virtual ~CScene();
 
 protected:
 	int							m_nObjects = 0;
-	CGameObject**				m_ppObjects = NULL;
+	CGameObject** m_ppObjects = NULL;
 
-	CWallsObject*				m_pWallsObject = NULL;
+	CWallsObject* m_pWallsObject = NULL;
 
-	CPlayer*					m_pPlayer = NULL;
+	CPlayer* m_pPlayer = NULL;
 
-	CGameObject*				m_pStartButton = NULL;
+	CGameObject* m_pStartButton = NULL;
+
+	SceneState					m_eSceneState = SceneState::RUNNING;
 
 #ifdef _WITH_DRAW_AXIS
-	CGameObject*				m_pWorldAxis = NULL;
+	CGameObject* m_pWorldAxis = NULL;
 #endif
 
 public:
+	UINT32 GetSceneState() const { return static_cast<UINT32>(m_eSceneState); }
+
 	virtual void BuildObjects() { }
 	virtual void ReleaseObjects() { }
 
@@ -34,9 +46,13 @@ public:
 	void CheckPlayerByWallCollision();
 	void CheckObjectByBulletCollisions();
 
+	virtual void SceneStart(float fElapsedtime) { }
 	virtual void Animate(float fElapsedTime) { }
+	virtual void PrepareChange(float fElapsedTime) { }
+	virtual void ChangeAnimation(float fElapsedTime) { }
+	virtual void SceneEnd(float fElapsedTime) { }
+
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera) { }
-	virtual void PrepareChange() { }
 
 	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { }
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam) { }
