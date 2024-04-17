@@ -16,27 +16,28 @@ private:
 
 	bool						m_bActive = true;
 
-	RECT						m_rcClient;
+	RECT						m_rcClient{ };
 
     HDC							m_hDCFrameBuffer = NULL;
     HBITMAP						m_hBitmapFrameBuffer = NULL;
     HBITMAP						m_hBitmapSelect = NULL;
 
 	CPlayer*					m_pPlayer = NULL;
-	CScene**					m_ppScenes = NULL;
-	CScene*						m_pScene = NULL;
 	CGameObject*				m_pLockedObject = NULL;
 
-	CGameTimer					m_GameTimer;
+	CGameTimer					m_GameTimer{ };
 
-	POINT						m_ptOldCursorPos;
+	POINT						m_ptOldCursorPos{ };
 
-	_TCHAR						m_pszFrameRate[50];
+	_TCHAR						m_pszFrameRate[50]{ };
 
+	UINT32						m_nScenes = 0;
+	UINT32						m_nCurSceneIdx = 0;
+	CScene**					m_ppScenes = NULL;
 	std::unordered_map<UINT32, std::function<void(CScene&, float)>> m_mapSceneFunctions{ };
 
 public:
-	inline static bool			m_bChangeScene{ false };
+	static void ChangeScene();
 
 public:
 	void OnCreate(HINSTANCE hInstance, HWND hMainWnd);
@@ -45,10 +46,6 @@ public:
 	void PrepareFunctions();
 
 	void NextScene();
-	void PrevScene();
-
-	// 24-04-13
-	void StartPlay();
 
 	void BuildFrameBuffer();
 	void ClearFrameBuffer(DWORD dwColor);

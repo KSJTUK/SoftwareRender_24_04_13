@@ -29,7 +29,7 @@ protected:
 
 	CGameObject* m_pStartButton = NULL;
 
-	SceneState					m_eSceneState = SceneState::RUNNING;
+	SceneState					m_eSceneState = SceneState::SCENE_START;
 
 #ifdef _WITH_DRAW_AXIS
 	CGameObject* m_pWorldAxis = NULL;
@@ -70,6 +70,7 @@ public:
 	virtual void BuildObjects();
 	virtual void ReleaseObjects();
 
+	virtual void SceneStart(float fElapsedtime) { m_eSceneState = SceneState::RUNNING; }
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 
@@ -84,10 +85,18 @@ public:
 	virtual ~CPlayScene() { } 
 
 public:
+	float m_fPlayerSpeedPerSec{ 1000.0f };
+	float m_fDeccelSpeedPerSec{ 250.0f };
+
+public:
 	virtual void BuildObjects();
 	virtual void ReleaseObjects();
 
+	virtual void SceneStart(float fElapsedtime);
 	virtual void Animate(float fElapsedTime);
+	virtual void PrepareChange(float fElapsedTime) { }
+	virtual void ChangeAnimation(float fElapsedTime) { }
+	virtual void SceneEnd(float fElapsedTime) { }
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 
 	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);

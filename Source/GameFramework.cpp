@@ -5,6 +5,12 @@
 #include "stdafx.h"
 #include "Header/GameFramework.h"
 
+extern CGameFramework gGameFramework;
+void CGameFramework::ChangeScene()
+{
+	gGameFramework.NextScene();
+}
+
 void CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
 	::srand(timeGetTime());
@@ -17,6 +23,8 @@ void CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	BuildFrameBuffer(); 
 
 	BuildObjects(); 
+
+	m_ppScenes[m_nCurSceneIdx]->BuildObjects();
 
 	_tcscpy_s(m_pszFrameRate, _T("LabProject ("));
 }
@@ -38,12 +46,14 @@ void CGameFramework::PrepareFunctions()
 	m_mapSceneFunctions.insert(std::make_pair(static_cast<UINT32>(SceneState::END), &CScene::SceneEnd));
 }
 
-void CGameFramework::StartPlay()
+void CGameFramework::NextScene()
 {
-	delete m_pScene;
-	m_pScene = new CPlayScene(m_pPlayer);
-	m_pScene->BuildObjects();
-	m_bChangeScene = false;
+	m_ppScenes[m_nCurSceneIdx]->ReleaseObjects();
+
+	++m_nCurSceneIdx;
+	assert(m_nCurSceneIdx < m_nScenes);
+	
+	m_ppScenes[m_nCurSceneIdx]->BuildObjects();
 }
 
 void CGameFramework::BuildFrameBuffer()
@@ -109,16 +119,21 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetCamera(pCamera);
 	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
 
-	m_pScene = new CStartScene(m_pPlayer);
-	m_pScene->BuildObjects();
+	m_nScenes = 2;
+	m_ppScenes = new CScene * [m_nScenes];
+	CScene* pScene = new CStartScene(m_pPlayer);
+	m_ppScenes[0] = pScene;
+	pScene = new CPlayScene(m_pPlayer);
+	m_ppScenes[1] = pScene;
 }
 
 void CGameFramework::ReleaseObjects()
 {
-	if (m_pScene)
-	{
-		m_pScene->ReleaseObjects();
-		delete m_pScene;
+	if (m_ppScenes) {
+		for (int i = 0; i < m_nScenes; ++i)
+			if (m_ppScenes[i]) delete m_ppScenes[i];
+
+		delete[] m_ppScenes;
 	}
 
 	if (m_pPlayer) delete m_pPlayer;
@@ -126,13 +141,8 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-
-	if (m_bChangeScene) {
-		::GetCursorPos(&m_ptOldCursorPos);
-		StartPlay();
-		return;
-	}
+	CScene* currentScene = m_ppScenes[m_nCurSceneIdx];
+	if (currentScene) currentScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 
 	switch (nMessageID)
 	{
@@ -144,7 +154,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		{
 			// 마우스 입력이 들어 오면 물체를 피킹하는 함수를 먼저 호출하고
 			// 피킹된 오브젝트가 있다면 lockedObject로 설정한다. -> 나중에 유도탄 연산에 사용한다.
-			m_pLockedObject = m_pScene->PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pPlayer->m_pCamera);
+			m_pLockedObject = currentScene->PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pPlayer->m_pCamera);
 			if (m_pLockedObject) m_pLockedObject->SetColor(RGB(0, 0, 0));
 		}
 		break;
@@ -161,7 +171,8 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	CScene* currentScene = m_ppScenes[m_nCurSceneIdx];
+	if (currentScene) currentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 
 	switch (nMessageID)
 	{
@@ -183,7 +194,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			if (!m_pPlayer->m_bBlowingUp) ((CAirplanePlayer*)m_pPlayer)->ActiveShield();
 			break;
 		default:
-			m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+			currentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 			break;
 		}
 		break;
@@ -262,10 +273,11 @@ void CGameFramework::AnimateObjects()
 {
 	// 게임 월드 내의 모든 오브젝트에 대해서 Animate함수를 호출하여 움직임을 업데이트 한다.
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
+
+	CScene* currentScene = m_ppScenes[m_nCurSceneIdx];
+	if (currentScene)
+		m_mapSceneFunctions[currentScene->GetSceneState()](*currentScene, fTimeElapsed);
 	if (m_pPlayer) m_pPlayer->Animate(fTimeElapsed);
-	if (m_pScene)
-		m_mapSceneFunctions[m_pScene->GetSceneState()](*m_pScene, fTimeElapsed);
-	//if (m_pScene) m_pScene->Animate(fTimeElapsed);
 }
 
 void CGameFramework::FrameAdvance()
@@ -280,7 +292,8 @@ void CGameFramework::FrameAdvance()
     ClearFrameBuffer(RGB(255, 255, 255));
 
 	CCamera* pCamera = m_pPlayer->GetCamera();
-	if (m_pScene) m_pScene->Render(m_hDCFrameBuffer, pCamera);
+	CScene* currentScene = m_ppScenes[m_nCurSceneIdx];
+	if (currentScene) currentScene->Render(m_hDCFrameBuffer, pCamera);
 
 	PresentFrameBuffer();
 

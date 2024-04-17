@@ -11,7 +11,7 @@
 HINSTANCE hInst;								// 현재 인스턴스입니다.
 const LPWSTR lpClientName = L"SoftwareRenderer";
 
-CGameFramework		gGameFramework;
+CGameFramework		gGameFramework{ };
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM				MyRegisterClass(HINSTANCE hInstance);

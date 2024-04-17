@@ -270,7 +270,7 @@ void CStartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 		::SetCapture(hWnd);
 		if (nMessageID == WM_LBUTTONDOWN)
 		{
-			CGameFramework::m_bChangeScene = true;
+			CGameFramework::ChangeScene();
 		}
 		break;
 	case WM_LBUTTONUP:
@@ -422,6 +422,8 @@ void CPlayScene::BuildObjects()
 	pExplosiveObject->SetPosition(+15.0f, 10.0f, 30.0f);
 	m_ppObjects[9] = pExplosiveObject;
 
+	m_pPlayer->SetPosition(0.0f, 0.0f, -2000.0f);
+	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -m_fPlayerSpeedPerSec * 0.1f));
 #ifdef _WITH_DRAW_AXIS
 	m_pWorldAxis = new CGameObject();
 	CAxisMesh* pAxisMesh = new CAxisMesh(0.5f, 0.5f, 0.5f);
@@ -441,6 +443,19 @@ void CPlayScene::ReleaseObjects()
 #ifdef _WITH_DRAW_AXIS
 	if (m_pWorldAxis) delete m_pWorldAxis;
 #endif
+}
+
+void CPlayScene::SceneStart(float fElapsedTime)
+{
+	m_pPlayer->Move(XMFLOAT3(0.0f, 0.0f, m_fPlayerSpeedPerSec * fElapsedTime), false);
+	m_fPlayerSpeedPerSec -= m_fDeccelSpeedPerSec * fElapsedTime;
+	if (m_fPlayerSpeedPerSec > 200.f)
+		m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -m_fPlayerSpeedPerSec * 0.1f));
+
+	if (m_pPlayer->GetPosition().z > 0.f) {
+		m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
+		m_eSceneState = SceneState::RUNNING;
+	}
 }
 
 void CPlayScene::Animate(float fElapsedTime)
