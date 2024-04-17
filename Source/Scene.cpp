@@ -338,12 +338,10 @@ void CPlayScene::BuildObjects()
 {
 	// 폭발하는 오브젝트의 기본적인 설정을 준비한다.
 	CExplosiveObject::PrepareExplosion();
-	CAirplaneEnemy::SetTargetObject(m_pPlayer);
-
 	m_pPlayer->m_bActive = true;
 
 	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = 100.f;
-	CWallMesh* pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 30);
+	CWallMesh* pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 5);
 
 	m_pWallsObject = new CWallsObject();
 	m_pWallsObject->SetPosition(0.0f, 0.0f, 0.0f);
@@ -361,69 +359,50 @@ void CPlayScene::BuildObjects()
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
+	XMFLOAT3 xmf3Positions[10] {
+		XMFLOAT3(-13.5f, 0.0f, -24.0f), XMFLOAT3(0.0f, 10.0f, 30.0f),
+		XMFLOAT3(0.0f, 0.0f, 15.0f), XMFLOAT3(-20.0f, 0.0f, 15.0f),
+		XMFLOAT3(15.0f, 0.0f, 0.0f), XMFLOAT3(-10.0f, 0.0f, -10.0f),
+		XMFLOAT3(-10.0f, 10.0f, -5.0f), XMFLOAT3(-40.0f, 10.0f, -25.0f),
+		XMFLOAT3(-15.0f, 10.0f, -30.0f), XMFLOAT3(+15.0f, 10.0f, 30.0f),
+	};
 	
-	CAirplaneEnemy* pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(255, 0, 0));
-	pExplosiveObject->SetPosition(-13.5f, 0.0f, -24.0f);
-	m_ppObjects[0] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(0, 0, 255));
-	pExplosiveObject->SetPosition(0.0f, 10.0f, 30.0f);
-	m_ppObjects[1] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(0, 255, 0));
-	pExplosiveObject->SetPosition(0.0f, 0.0f, 15.0f);
-	m_ppObjects[2] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(0, 255, 255));
-	pExplosiveObject->SetPosition(-20.0f, 0.0f, 15.0f);
-	m_ppObjects[3] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(128, 0, 255));
-	pExplosiveObject->SetPosition(15.0f, 0.0f, 0.0f);
-	m_ppObjects[4] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(255, 0, 255));
-	pExplosiveObject->SetPosition(-10.0f, 0.0f, -10.0f);
-	m_ppObjects[5] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(255, 0, 255));
-	pExplosiveObject->SetPosition(-10.0f, 10.0f, -5.0f);
-	m_ppObjects[6] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(255, 0, 128));
-	pExplosiveObject->SetPosition(-40.0f, 10.0f, -25.0f);
-	m_ppObjects[7] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(128, 0, 255));
-	pExplosiveObject->SetPosition(-15.0f, 10.0f, -30.0f);
-	m_ppObjects[8] = pExplosiveObject;
-
-	pExplosiveObject = new CAirplaneEnemy();
-	pExplosiveObject->SetMesh(pAirPlaneMesh);
-	pExplosiveObject->SetColor(RGB(255, 64, 64));
-	pExplosiveObject->SetPosition(+15.0f, 10.0f, 30.0f);
-	m_ppObjects[9] = pExplosiveObject;
+	for (int i = 0; i < m_nObjects; ++i) {
+		CAirplaneEnemy* pExplosiveObject = new CAirplaneEnemy();
+		pExplosiveObject->SetMesh(pAirPlaneMesh);
+		pExplosiveObject->SetColor(Random::RandomColor());
+		pExplosiveObject->SetPosition(xmf3Positions[i].x, xmf3Positions[i].y, xmf3Positions[i].z);
+		m_ppObjects[i] = pExplosiveObject;
+	}
 
 	m_pPlayer->SetPosition(0.0f, 0.0f, -2000.0f);
 	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -m_fPlayerSpeedPerSec * 0.1f));
+
+	
+	float offset = 5.f;
+	XMFLOAT3 xmf3Start = m_pPlayer->GetPosition();
+	CAirplaneMesh* pSmallAirPlaneMesh = new CAirplaneMesh(3.0f, 3.0f, 0.5f);
+	m_ppFriendTurrets = new CGameObject*[4];
+	XMFLOAT3 xmf3MoveDirs[4]{
+		Vector3::Normalize(XMFLOAT3(-0.5f, 1.0f, 1.0f)), Vector3::Normalize(XMFLOAT3(-0.5f, 1.0f, 1.0f)),
+		Vector3::Normalize(XMFLOAT3(0.5f, 1.0f, 1.0f)), Vector3::Normalize(XMFLOAT3(0.5f, 1.0f, 1.0f)),
+	};
+
+	xmf3Start.x -= offset * 2;
+	for (int i = 0; i < 4; ++i) {
+		CEnemy* pExplosiveObject = new CEnemy();
+		pExplosiveObject->SetMesh(pSmallAirPlaneMesh);
+		pExplosiveObject->SetColor(RGB(0, 255, 0));
+		pExplosiveObject->SetPosition(xmf3Start.x, xmf3Start.y, xmf3Start.z - 10.f);
+		pExplosiveObject->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 1.0f));
+		pExplosiveObject->SetRotateLookSpeed(0.0f);
+		pExplosiveObject->m_qxmf3RotateDests.push(xmf3MoveDirs[i]);
+		xmf3Start.x += offset;
+		if (i == 1)
+			xmf3Start.x += offset;
+		m_ppFriendTurrets[i] = pExplosiveObject;
+	}
+
 #ifdef _WITH_DRAW_AXIS
 	m_pWorldAxis = new CGameObject();
 	CAxisMesh* pAxisMesh = new CAxisMesh(0.5f, 0.5f, 0.5f);
@@ -447,15 +426,31 @@ void CPlayScene::ReleaseObjects()
 
 void CPlayScene::SceneStart(float fElapsedTime)
 {
+	static float fFriendMoveTime = 0.0f;
+	fFriendMoveTime += fElapsedTime;
+
 	m_pPlayer->Move(XMFLOAT3(0.0f, 0.0f, m_fPlayerSpeedPerSec * fElapsedTime), false);
 	m_fPlayerSpeedPerSec -= m_fDeccelSpeedPerSec * fElapsedTime;
 	if (m_fPlayerSpeedPerSec > 200.f)
 		m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -m_fPlayerSpeedPerSec * 0.1f));
 
-	if (m_pPlayer->GetPosition().z > 0.f) {
-		m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
-		m_eSceneState = SceneState::RUNNING;
+	for (int i = 0; i < 4; ++i) {
+		if (fFriendMoveTime > 1.5f) {
+			((CEnemy*)m_ppFriendTurrets[i])->SetRotateLookSpeed(5.0f);
+		}
+		m_ppFriendTurrets[i]->SetMovingSpeed(m_fPlayerSpeedPerSec);
+		m_ppFriendTurrets[i]->Animate(fElapsedTime);
 	}
+
+	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->Animate(fElapsedTime);
+
+	if (m_pPlayer->GetPosition().z < 0.f) {
+		return;
+	}
+
+	CAirplaneEnemy::SetTargetObject(m_pPlayer);
+	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
+	m_eSceneState = SceneState::RUNNING;
 }
 
 void CPlayScene::Animate(float fElapsedTime)
@@ -482,6 +477,7 @@ void CPlayScene::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 	// 모든 오브젝트를 MemoryDC에 그린다.
 	m_pWallsObject->Render(hDCFrameBuffer, pCamera);
 	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->Render(hDCFrameBuffer, pCamera);
+	for (int i = 0; i < 4; ++i) m_ppFriendTurrets[i]->Render(hDCFrameBuffer, pCamera);
 
 	if (m_pPlayer) m_pPlayer->Render(hDCFrameBuffer, pCamera);
 
@@ -518,6 +514,9 @@ void CPlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			pExplosiveObject->m_bBlowingUp = true;
 			break;
 		}
+		case '0':
+			((CAirplanePlayer*)m_pPlayer)->FireBulletToAll(m_ppObjects, m_nObjects);
+			break;
 		case 'A':
 			for (int i = 0; i < m_nObjects; i++)
 			{

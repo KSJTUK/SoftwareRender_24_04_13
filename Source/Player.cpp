@@ -282,6 +282,12 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 	}
 }
 
+void CAirplanePlayer::FireBulletToAll(CGameObject** ppObjects, UINT32 nObjects)
+{
+	for (UINT32 i = 0; i < nObjects; ++i)
+		FireBullet(ppObjects[i]);
+}
+
 void CAirplanePlayer::ActiveShield()
 {
 	m_pSheild->ActiveSheild();

@@ -20,11 +20,13 @@ public:
 	float           			m_fYaw = 0.0f;
 	float           			m_fRoll = 0.0f;
 
+	float						m_fRotateToSpeed{ 100.0f };
 	std::queue<XMFLOAT3>		m_qxmf3RotateDests{ };
 
 public:
 	void SetPosition(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
+	void SetRotateLookSpeed(float fSpeed);
 
 	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 

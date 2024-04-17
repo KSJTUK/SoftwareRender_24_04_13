@@ -85,8 +85,9 @@ public:
 	virtual ~CPlayScene() { } 
 
 public:
-	float m_fPlayerSpeedPerSec{ 1000.0f };
-	float m_fDeccelSpeedPerSec{ 250.0f };
+	float				m_fPlayerSpeedPerSec{ 1000.0f };
+	float				m_fDeccelSpeedPerSec{ 250.0f };
+	CGameObject**		m_ppFriendTurrets = nullptr;
 
 public:
 	virtual void BuildObjects();

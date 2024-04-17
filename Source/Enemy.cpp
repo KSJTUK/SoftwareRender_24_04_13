@@ -12,13 +12,17 @@ CEnemy::~CEnemy()
 void CEnemy::SetPosition(float x, float y, float z)
 {
 	m_xmf3Position = XMFLOAT3(x, y, z);
-	m_qxmf3RotateDests.push(Random::RandomFloat3(-1.0f, 1.0f, true));
 
 	CGameObject::SetPosition(x, y, z);
 }
 
 void CEnemy::SetRotation(float x, float y, float z)
 {
+}
+
+void CEnemy::SetRotateLookSpeed(float fSpeed)
+{
+	m_fRotateToSpeed = fSpeed;
 }
 
 void CEnemy::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
@@ -104,9 +108,10 @@ void CEnemy::OnUpdateTransform()
 void CEnemy::Animate(float fElapsedTime)
 {
 	if (!m_qxmf3RotateDests.empty())
-		RotateToSmoothly(m_qxmf3RotateDests.front(), 100.0f * fElapsedTime);
+		RotateToSmoothly(m_qxmf3RotateDests.front(), m_fRotateToSpeed * fElapsedTime);
 
 	OnUpdateTransform();
+	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
 	CExplosiveObject::Animate(fElapsedTime);
 	Update(fElapsedTime);
 }
@@ -130,6 +135,8 @@ CAirplaneEnemy::CAirplaneEnemy()
 		m_ppBullets[i]->SetMovingSpeed(120.0f);
 		m_ppBullets[i]->SetActive(false);
 	}
+
+	m_qxmf3RotateDests.push(Random::RandomFloat3(-1.0f, 1.0f, true));
 }
 
 CAirplaneEnemy::~CAirplaneEnemy()
@@ -139,8 +146,6 @@ CAirplaneEnemy::~CAirplaneEnemy()
 void CAirplaneEnemy::OnUpdateTransform()
 {
 	CEnemy::OnUpdateTransform();
-
-	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
 }
 
 void CAirplaneEnemy::Animate(float fElapsedTime)
@@ -155,8 +160,6 @@ void CAirplaneEnemy::Animate(float fElapsedTime)
 		}
 	}
 	else {
-		SetRotationSpeed(0.0f);
-		m_fMovingSpeed = 10.0f;
 		if (m_fChangeDirectionTime < m_fElapsedChangingDirection && m_qxmf3RotateDests.empty()) {
 			m_qxmf3RotateDests.push(Random::RandomFloat3(-1.0f, 1.0f, true));
 			m_fMovingSpeed = Random::RandomFloat(0.0f, 20.0f);

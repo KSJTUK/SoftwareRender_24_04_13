@@ -5,9 +5,9 @@
 #include "stdafx.h"
 #include "Header/GameFramework.h"
 
-extern CGameFramework gGameFramework;
 void CGameFramework::ChangeScene()
 {
+	extern CGameFramework gGameFramework;
 	gGameFramework.NextScene();
 }
 

@@ -69,6 +69,7 @@ public:
 	CTurret*					m_pTurret{ nullptr };
 
 	void FireBullet(CGameObject* pLockedObject);
+	void FireBulletToAll(CGameObject** ppObjects, UINT32 nObjects);
 	void ActiveShield();
 
 	virtual void OnUpdateTransform();

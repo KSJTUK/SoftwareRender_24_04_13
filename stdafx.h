@@ -76,6 +76,12 @@ namespace Random {
 		std::uniform_real_distribution<float> urd{ fMin, fMax };
 		return urd(dre);
 	}
+
+	inline DWORD RandomColor()
+	{
+		std::uniform_int_distribution uid{ 0x00, 0xff };
+		return RGB(uid(dre), uid(dre), uid(dre));
+	}
 }
 
 namespace Vector3
