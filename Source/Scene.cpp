@@ -371,13 +371,13 @@ void CPlayScene::BuildObjects()
 		CAirplaneEnemy* pExplosiveObject = new CAirplaneEnemy();
 		pExplosiveObject->SetMesh(pAirPlaneMesh);
 		pExplosiveObject->SetColor(Random::RandomColor());
+		pExplosiveObject->SetMovingSpeed(20.0f);
 		pExplosiveObject->SetPosition(xmf3Positions[i].x, xmf3Positions[i].y, xmf3Positions[i].z);
 		m_ppObjects[i] = pExplosiveObject;
 	}
 
 	m_pPlayer->SetPosition(0.0f, 0.0f, -2000.0f);
 	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -m_fPlayerSpeedPerSec * 0.1f));
-
 	
 	float offset = 5.f;
 	XMFLOAT3 xmf3Start = m_pPlayer->GetPosition();
@@ -419,6 +419,9 @@ void CPlayScene::ReleaseObjects()
 
 	if (m_pWallsObject) delete m_pWallsObject;
 
+	for (int i = 0; i < 4; ++i) if (m_ppFriendTurrets[i]) delete m_ppFriendTurrets[i];
+	delete[] m_ppFriendTurrets;
+
 #ifdef _WITH_DRAW_AXIS
 	if (m_pWorldAxis) delete m_pWorldAxis;
 #endif
@@ -433,6 +436,8 @@ void CPlayScene::SceneStart(float fElapsedTime)
 	m_fPlayerSpeedPerSec -= m_fDeccelSpeedPerSec * fElapsedTime;
 	if (m_fPlayerSpeedPerSec > 200.f)
 		m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -m_fPlayerSpeedPerSec * 0.1f));
+	else
+		m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
 
 	for (int i = 0; i < 4; ++i) {
 		if (fFriendMoveTime > 1.5f) {
@@ -443,11 +448,14 @@ void CPlayScene::SceneStart(float fElapsedTime)
 	}
 
 	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->Animate(fElapsedTime);
+	CheckObjectByWallCollisions(fElapsedTime);
+	CheckObjectByObjectCollisions(fElapsedTime);
 
 	if (m_pPlayer->GetPosition().z < 0.f) {
 		return;
 	}
 
+	::ReleaseCapture();
 	CAirplaneEnemy::SetTargetObject(m_pPlayer);
 	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -20.0f));
 	m_eSceneState = SceneState::RUNNING;

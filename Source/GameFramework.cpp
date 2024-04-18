@@ -222,10 +222,12 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 	case WM_MOUSEMOVE:
+		if (m_ppScenes[m_nCurSceneIdx]->GetSceneState() == SceneState::SCENE_START)  break;
 		OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 		break;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
+		if (m_ppScenes[m_nCurSceneIdx]->GetSceneState() == SceneState::SCENE_START) break;
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 		break;
 	}
@@ -234,6 +236,11 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 
 void CGameFramework::ProcessInput()
 {
+	if (m_ppScenes[m_nCurSceneIdx]->GetSceneState() == SceneState::SCENE_START) {
+		m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+		return;
+	}
+
 	static UCHAR pKeyBuffer[256];
 	if (GetKeyboardState(pKeyBuffer))
 	{

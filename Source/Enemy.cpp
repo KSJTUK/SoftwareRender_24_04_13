@@ -77,6 +77,7 @@ void CEnemy::RotateToSmoothly(XMFLOAT3& xmf3Dest, float fSpeed)
 	float fAngle = XMConvertToDegrees(Vector3::Angle(m_xmf3Look, xmf3Dest));
 	if (fAngle < fEqualAngleDegree) {
 		m_qxmf3RotateDests.pop();
+		m_fMovingSpeed = Random::RandomFloat(10.0f, 20.0f);
 		return;
 	}
 
@@ -162,7 +163,6 @@ void CAirplaneEnemy::Animate(float fElapsedTime)
 	else {
 		if (m_fChangeDirectionTime < m_fElapsedChangingDirection && m_qxmf3RotateDests.empty()) {
 			m_qxmf3RotateDests.push(Random::RandomFloat3(-1.0f, 1.0f, true));
-			m_fMovingSpeed = Random::RandomFloat(0.0f, 20.0f);
 			m_fElapsedChangingDirection = 0.0f;
 		}
 	}
