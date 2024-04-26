@@ -73,6 +73,18 @@ void CGameObject::SetRotationTransform(XMFLOAT4X4* pmxf4x4Transform)
 	m_xmf4x4World._31 = pmxf4x4Transform->_31; m_xmf4x4World._32 = pmxf4x4Transform->_32; m_xmf4x4World._33 = pmxf4x4Transform->_33;
 }
 
+bool CGameObject::MoveToSmoothly(XMFLOAT3& xmf3Dest, float fSpeed)
+{
+	XMFLOAT3 xmf3Direction = Vector3::Normalize(Vector3::Subtract(xmf3Dest, GetPosition()));
+	if (IsEqual(xmf3Direction, Vector3::ScalarProduct(m_xmf3PrevMoveTo, -1.0f, false)) || IsEqual(xmf3Dest, GetPosition())) {
+		SetPosition(xmf3Dest);
+		return true;
+	}
+	m_xmf3PrevMoveTo = xmf3Direction;
+	Move(xmf3Direction, fSpeed);
+	return false;
+}
+
 void CGameObject::MoveStrafe(float fDistance)
 {
 	XMFLOAT3 xmf3Position = GetPosition();

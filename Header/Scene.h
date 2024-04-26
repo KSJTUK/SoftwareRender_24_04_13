@@ -60,6 +60,7 @@ public:
 	CGameObject* PickObjectPointedByCursor(int xClient, int yClient, CCamera* pCamera);
 };
 
+#define FIREWORKS 4
 class CStartScene : public CScene
 {
 public:
@@ -67,11 +68,19 @@ public:
 	virtual ~CStartScene() { }
 
 public:
+	CGameObject*	m_ppFireworks[FIREWORKS]{ };
+	XMFLOAT3		m_xmf3ExplosivePos[FIREWORKS]{ };
+	const float		m_fEndAnimationTime{ 5.0f };
+	float			m_fExplosionDurationCount{ 0.0f };
+	float			m_fTimeCount{ 0.0f };
+
+public:
 	virtual void BuildObjects();
 	virtual void ReleaseObjects();
 
 	virtual void SceneStart(float fElapsedtime) { m_eSceneState = SceneState::RUNNING; }
 	virtual void Animate(float fElapsedTime);
+	virtual void SceneEnd(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 
 	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);

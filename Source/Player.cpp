@@ -195,8 +195,8 @@ CAirplanePlayer::CAirplanePlayer()
 
 	m_pTurret = new CTurret(this);
 	m_pTurret->m_fOrbitSpeed = 20.f;
-	//m_pTurret->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//m_pTurret->SetRotationSpeed(180.f);
+	m_pTurret->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	m_pTurret->SetRotationSpeed(180.f);
 }
 
 CAirplanePlayer::~CAirplanePlayer()

@@ -57,6 +57,12 @@ public:
 
 #define BULLETS					50
 
+enum class PLAYER_WEAPON {
+	NORMAL,
+	SHOTGUN,
+	ALL_LOCKED
+};
+
 class CAirplanePlayer : public CPlayer
 {
 public:
@@ -75,5 +81,4 @@ public:
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
-
 };

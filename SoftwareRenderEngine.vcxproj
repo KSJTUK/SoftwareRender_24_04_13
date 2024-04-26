@@ -168,7 +168,6 @@
     <ClInclude Include="Header\Scene.h" />
     <ClInclude Include="Header\targetver.h" />
     <ClInclude Include="Header\Timer.h" />
-    <ClInclude Include="Items.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -17,6 +17,7 @@ public:
 	CMesh*		m_typeMesh{ };
 };
 
+#define TURRET_BULLETS 10
 class CTurret : public CItem
 {
 public:
@@ -25,6 +26,7 @@ public:
 
 public:
 	CGameObject*	m_pParent{ };
+	XMFLOAT3		m_xmf3Offset{ 0.0f, 0.0f, 5.0f };
 
 	float			m_fOrbitSpeed{ };
 	

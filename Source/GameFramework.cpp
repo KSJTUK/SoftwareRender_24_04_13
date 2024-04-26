@@ -102,6 +102,9 @@ void CGameFramework::PresentFrameBuffer()
 
 void CGameFramework::BuildObjects()
 {
+	// 폭발하는 오브젝트의 기본적인 설정을 준비한다.
+	CExplosiveObject::PrepareExplosion();
+
 	CCamera* pCamera = new CCamera();
 	// 카메라에 현재 기본
 	pCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
@@ -130,11 +133,11 @@ void CGameFramework::BuildObjects()
 void CGameFramework::ReleaseObjects()
 {
 	if (m_ppScenes) {
-		for (int i = 0; i < m_nScenes; ++i)
+		for (UINT32 i = 0; i < m_nScenes; ++i)
 			if (m_ppScenes[i]) delete m_ppScenes[i];
-
-		delete[] m_ppScenes;
 	}
+	
+	delete[] m_ppScenes;
 
 	if (m_pPlayer) delete m_pPlayer;
 }

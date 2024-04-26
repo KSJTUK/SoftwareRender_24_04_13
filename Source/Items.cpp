@@ -19,6 +19,8 @@ CTurret::CTurret(CGameObject* pParent) : m_pParent{ pParent }
 	XMFLOAT3 xmf3Position = m_pParent->GetPosition();
 	xmf3Position.x += 2.f;
 	SetPosition(xmf3Position);
+	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
+	OnUpdateTransform();
 }
 
 CTurret::~CTurret()
@@ -27,15 +29,14 @@ CTurret::~CTurret()
 
 void CTurret::Animate(float fElapsedTime)
 {
-	//m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
+	m_xmf4x4World = m_pParent->m_xmf4x4World;
+	SetPosition(Vector3::Add(m_xmf3Offset, m_pParent->GetPosition()));
 	CRotatingObject::Animate(fElapsedTime);
 	Orbit(fElapsedTime);
 }
 
 void CTurret::Orbit(float fElapsedTime)
 {
-	XMFLOAT3 xmf3Position = Vector3::Subtract(GetPosition(), m_pParent->GetPosition());
 	XMMATRIX rotation = XMMatrixRotationAxis(XMLoadFloat3(&m_pParent->GetLook()), XMConvertToRadians(m_fOrbitSpeed) * fElapsedTime);
-	xmf3Position = Vector3::TransformCoord(xmf3Position, rotation);
-	SetPosition(Vector3::Add(xmf3Position, m_pParent->GetPosition()));
+	m_xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, rotation);
 }

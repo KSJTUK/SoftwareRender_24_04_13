@@ -185,14 +185,16 @@ void CAirplaneEnemy::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 
 void CAirplaneEnemy::AfterCollision(const CGameObject* pCollObject, float fElapsedTime)
 {
-	CancelLastMove(fElapsedTime * 1.5f);
+	CancelLastMove(fElapsedTime * 2.0f);
+	m_fMovingSpeed = 0.0f;
 	while (!m_qxmf3RotateDests.empty()) m_qxmf3RotateDests.pop();
 	m_qxmf3RotateDests.push(m_xmf3MovingDirection);
 }
 
 void CAirplaneEnemy::AfterWallCollision(float fElapsedTime)
 {
-	CancelLastMove(fElapsedTime * 1.5f);
+	CancelLastMove(fElapsedTime * 2.0f);
+	m_fMovingSpeed = 0.0f;
 	while (!m_qxmf3RotateDests.empty()) m_qxmf3RotateDests.pop();
 	m_qxmf3RotateDests.push(m_xmf3MovingDirection);
 }
@@ -216,9 +218,8 @@ void CAirplaneEnemy::ChaseTarget(float fElapsedTime)
 	XMFLOAT3 xmf3RotationAxis = Vector3::CrossProduct(m_xmf3Look, xmf3ToTarget);
 	float fAngle = XMConvertToDegrees(Vector3::Angle(m_xmf3Look, xmf3ToTarget));
 
-	if (IsZero(xmf3RotationAxis)) {
+	if (IsZero(xmf3RotationAxis)) 
 		xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	}
 
 	RotateLook(
 		xmf3RotationAxis, fAngle * fElapsedTime

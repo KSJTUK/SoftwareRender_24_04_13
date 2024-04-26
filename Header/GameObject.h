@@ -21,6 +21,7 @@ public:
 	DWORD						m_dwDefaultColor = RGB(255, 0, 0);
 	DWORD						m_dwColor = RGB(255, 0, 0);
 
+	XMFLOAT3					m_xmf3PrevMoveTo = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3MovingDirection = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	float						m_fMovingSpeed = 0.0f;
 	float						m_fMovingRange = 0.0f;
@@ -40,6 +41,8 @@ public:
 	void SetMovingDirection(XMFLOAT3& xmf3MovingDirection) { m_xmf3MovingDirection = Vector3::Normalize(xmf3MovingDirection); }
 	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }
 	void SetMovingRange(float fRange) { m_fMovingRange = fRange; }
+
+	bool MoveToSmoothly(XMFLOAT3& xmf3Dest, float fSpeed);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);

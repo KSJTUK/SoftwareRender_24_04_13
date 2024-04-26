@@ -189,25 +189,50 @@ void CScene::CheckObjectByBulletCollisions()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CStartScene::BuildObjects()
 {
+	for (int i = 0; i < FIREWORKS; ++i) {
+		float x = i % 2 == 0 ? -15.0f : 15.0f;
+		float y = i / 2 == 0 ? -7.5f : 7.5f;
+		m_xmf3ExplosivePos[i].x = x;
+		m_xmf3ExplosivePos[i].y = y;
+		m_xmf3ExplosivePos[i].z = 0.0f;
+	}
+
+	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 0.0f, -50.0f));
 	int nAlphas[5] = { S, T, A, R, T };
 	m_nObjects = 1 + CNT_S + CNT_T + CNT_A + CNT_R + CNT_T;
 	m_ppObjects = new CGameObject*[m_nObjects];
 	m_pPlayer->m_bActive = false;
 
 	int nObjects = 0;
-	CCubeMesh* pButtonMesh = new CCubeMesh(25.f, 15.f, 0.0f);
+	CCubeMesh* pButtonMesh = new CCubeMesh(50.f, 30.f, 0.0f);
 	CGameObject* pButton = new CGameObject();
 	pButton->SetMesh(pButtonMesh);
 	pButton->SetColor(RGB(0, 0, 0));
 	pButton->SetPosition(0.0f, 0.0f, 0.0f);
 	m_ppObjects[nObjects++] = pButton;
 
+	CCubeMesh* pCubeMesh = new CCubeMesh(1.0f, 1.0f, 1.0f);
+	for (int i = 0; i < FIREWORKS; ++i) {
+		CExplosiveObject* pFirework = new CExplosiveObject();
+		pFirework->SetMesh(pCubeMesh);
+		DWORD randomColor = Random::RandomColor();
+		pFirework->SetColor(randomColor);
+		pFirework->m_dwDefaultColor = randomColor;
+		if (i % 2 == 0) {
+			pFirework->SetPosition(-15.0f, -100.0f, 0.0f);
+		}
+		else {
+			pFirework->SetPosition(15.0f, -100.0f, 0.0f);
+		}
+		m_ppFireworks[i] = pFirework;
+	}
+
 	float fLeft = -18.f;
 	float fTop = 6.0f;
 	float fXSize = 2.0f;
 	float fYSize = 3.0f;
 	float fZ = 14.0f;
-	CCubeMesh* pCubeMesh = new CCubeMesh(fXSize, fYSize, fXSize);
+	pCubeMesh = new CCubeMesh(fXSize, fYSize, fXSize);
 
 	int nWidth = 0;
 	int nHeight = 0;
@@ -251,6 +276,25 @@ void CStartScene::Animate(float fElapsedTime)
 			m_ppObjects[i]->Animate(fElapsedTime);
 }
 
+void CStartScene::SceneEnd(float fElapsedTime)
+{
+	for (int i = 0; i < m_nObjects; ++i)
+		if (m_ppObjects[i]->m_bActive)
+			m_ppObjects[i]->Animate(fElapsedTime);
+
+	for (int i = 0; i < FIREWORKS; ++i) {
+		if (m_ppFireworks[i]->MoveToSmoothly(m_xmf3ExplosivePos[i], 100.0f * fElapsedTime)) {
+			((CExplosiveObject*)m_ppFireworks[i])->m_bBlowingUp = true;
+		}
+		m_ppFireworks[i]->Animate(fElapsedTime);
+	}
+
+	m_fTimeCount += fElapsedTime;
+	if (m_fEndAnimationTime < m_fTimeCount) {
+		CGameFramework::ChangeScene();
+	}
+}
+
 void CStartScene::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
 	// 그래픽 파이프라인에 뷰포트정보와 카메라, 투영행렬 정보를 설정한다.
@@ -260,6 +304,10 @@ void CStartScene::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 	for (int i = 0; i < m_nObjects; ++i)
 		if (m_ppObjects[i])
 			m_ppObjects[i]->Render(hDCFrameBuffer, pCamera);
+
+	for (int i = 0; i < FIREWORKS; ++i) {
+		m_ppFireworks[i]->Render(hDCFrameBuffer, pCamera);
+	}
 }
 
 void CStartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -270,7 +318,7 @@ void CStartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 		::SetCapture(hWnd);
 		if (nMessageID == WM_LBUTTONDOWN)
 		{
-			CGameFramework::ChangeScene();
+			m_eSceneState = SceneState::END;
 		}
 		break;
 	case WM_LBUTTONUP:
@@ -336,8 +384,6 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlayScene::BuildObjects()
 {
-	// 폭발하는 오브젝트의 기본적인 설정을 준비한다.
-	CExplosiveObject::PrepareExplosion();
 	m_pPlayer->m_bActive = true;
 
 	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = 100.f;
@@ -370,7 +416,9 @@ void CPlayScene::BuildObjects()
 	for (int i = 0; i < m_nObjects; ++i) {
 		CAirplaneEnemy* pExplosiveObject = new CAirplaneEnemy();
 		pExplosiveObject->SetMesh(pAirPlaneMesh);
-		pExplosiveObject->SetColor(Random::RandomColor());
+		DWORD randomColor = Random::RandomColor();
+		pExplosiveObject->SetColor(randomColor);
+		pExplosiveObject->m_dwDefaultColor = randomColor;
 		pExplosiveObject->SetMovingSpeed(20.0f);
 		pExplosiveObject->SetPosition(xmf3Positions[i].x, xmf3Positions[i].y, xmf3Positions[i].z);
 		m_ppObjects[i] = pExplosiveObject;
@@ -402,6 +450,8 @@ void CPlayScene::BuildObjects()
 			xmf3Start.x += offset;
 		m_ppFriendTurrets[i] = pExplosiveObject;
 	}
+
+	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->Animate(0.0f);
 
 #ifdef _WITH_DRAW_AXIS
 	m_pWorldAxis = new CGameObject();
@@ -447,11 +497,7 @@ void CPlayScene::SceneStart(float fElapsedTime)
 		m_ppFriendTurrets[i]->Animate(fElapsedTime);
 	}
 
-	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->Animate(fElapsedTime);
-	CheckObjectByWallCollisions(fElapsedTime);
-	CheckObjectByObjectCollisions(fElapsedTime);
-
-	if (m_pPlayer->GetPosition().z < 0.f) {
+	if (m_pPlayer->GetPosition().z < -20.f) {
 		return;
 	}
 
