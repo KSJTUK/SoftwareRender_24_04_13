@@ -60,6 +60,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 	gGameFramework.OnDestroy();
 
+#ifdef _DEBUG
+#include <crtdbg.h>
+	_CrtDumpMemoryLeaks();
+#endif
+
 	return (int)msg.wParam;
 }
 

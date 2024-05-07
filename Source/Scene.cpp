@@ -267,6 +267,10 @@ void CStartScene::ReleaseObjects()
 			delete m_ppObjects[i];
 
 	if (m_ppObjects) delete[] m_ppObjects;
+
+	for (int i = 0; i < FIREWORKS; ++i)
+		if (m_ppFireworks[i])
+			delete m_ppFireworks[i];
 }
 
 void CStartScene::Animate(float fElapsedTime)
@@ -462,8 +466,6 @@ void CPlayScene::BuildObjects()
 
 void CPlayScene::ReleaseObjects()
 {
-	if (CExplosiveObject::m_pExplosionMesh) CExplosiveObject::m_pExplosionMesh->Release();
-
 	for (int i = 0; i < m_nObjects; i++) if (m_ppObjects[i]) delete m_ppObjects[i];
 	if (m_ppObjects) delete[] m_ppObjects;
 

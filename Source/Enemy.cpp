@@ -142,6 +142,10 @@ CAirplaneEnemy::CAirplaneEnemy()
 
 CAirplaneEnemy::~CAirplaneEnemy()
 {
+	for (int i = 0; i < ENEMY_BULLETS; ++i)
+		if (m_ppBullets[i])
+			delete m_ppBullets[i];
+	if (m_ppBullets) delete[] m_ppBullets;
 }
 
 void CAirplaneEnemy::OnUpdateTransform()

@@ -31,6 +31,7 @@ private:
 
 	_TCHAR						m_pszFrameRate[50]{ };
 
+	// ----------------------------------------------------------------------------------------
 	UINT32						m_nScenes = 0;
 	UINT32						m_nCurSceneIdx = 0;
 	CScene**					m_ppScenes = NULL;

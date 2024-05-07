@@ -21,8 +21,9 @@ CGameTimer::CGameTimer()
 	m_fFPSTimeElapsed = 0.0f;
 }
 
-CGameTimer::~CGameTimer()
+CGameTimer::~CGameTimer() 
 {
+
 }
 
 void CGameTimer::Tick(float fLockFPS)

@@ -31,6 +31,7 @@ void CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 void CGameFramework::OnDestroy()
 {
+	if (CExplosiveObject::m_pExplosionMesh) CExplosiveObject::m_pExplosionMesh->Release();
 	ReleaseObjects();
 
 	if (m_hBitmapFrameBuffer) ::DeleteObject(m_hBitmapFrameBuffer);
@@ -132,6 +133,8 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::ReleaseObjects()
 {
+	m_ppScenes[m_nCurSceneIdx]->ReleaseObjects();
+
 	if (m_ppScenes) {
 		for (UINT32 i = 0; i < m_nScenes; ++i)
 			if (m_ppScenes[i]) delete m_ppScenes[i];
